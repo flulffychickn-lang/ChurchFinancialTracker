@@ -37,6 +37,15 @@ function go(page){document.querySelectorAll(".page").forEach(p=>p.classList.remo
 document.querySelectorAll(".nav-btn").forEach(b=>b.addEventListener("click",()=>go(b.dataset.page)));
 function openModal(id){document.getElementById(id).classList.add("open")}
 function closeModal(id){document.getElementById(id).classList.remove("open")}
+function removeAccount(id){
+  const a=data.accounts.find(x=>String(x.id)===String(id)); if(!a)return toast("Bank account not found.");
+  const balance=Number(a.balance)||0;
+  const balanceWarning=Math.abs(balance)>0.000001?`\n\nCurrent balance: ${peso(balance)}. Removing this account will remove that amount from the active bank total. Historical transactions will be kept.`:"\n\nHistorical transactions will be kept.";
+  if(!confirm(`First confirmation: Remove bank account “${a.name}”?${balanceWarning}`))return;
+  const typed=prompt(`Final confirmation for “${a.name}”\n\nType DELETE (all caps) to remove this account:`);
+  if(typed!=="DELETE")return toast("Removal cancelled. You must type DELETE exactly.");
+  data.accounts=data.accounts.filter(x=>String(x.id)!==String(id)); persist(); toast("Bank account removed. Historical records were kept.");
+}
 function addAccount(){
   const nameEl=document.getElementById("newAccountName");
   const balanceEl=document.getElementById("newAccountBalance");
@@ -115,6 +124,16 @@ function saveActivity(){
   if(!sourceAccount)return toast("Add or select a bank account first.");if(sourceAccount.balance<amt)return toast("Not enough money in the selected bank account.");sourceAccount.balance-=amt;data.bankRecords.unshift({date:today(),type:"Activity Expense",account:sourceAccount.name,amount:-amt,note:type+": "+note})
   data.activities.unshift({date:today(),activity:type,amount:-amt,source,note});document.getElementById("activityAmount").value="";document.getElementById("activityNote").value="";persist();toast("Activity expense recorded.")
 }
+function removeMember(id){
+  const m=data.members.find(x=>String(x.id)===String(id)); if(!m)return toast("Member not found.");
+  const balance=Number(m.balance)||0;
+  if(!confirm(`First confirmation: Remove member “${m.name}”?\n\n${balance!==0?`Current savings balance: ${peso(balance)}. Removing the member will remove this balance from active member totals.\n`:""}Transaction history will be retained for audit purposes.`))return;
+  const typed=prompt(`Final confirmation for “${m.name}”\n\nType DELETE (all caps) to remove this member:`);
+  if(typed!=="DELETE")return toast("Removal cancelled. You must type DELETE exactly.");
+  // Preserve the member name on historical transactions before removing the profile.
+  data.savingsRecords.forEach(r=>{if(String(r.memberId)===String(id)&&!r.memberName)r.memberName=m.name;});
+  data.members=data.members.filter(x=>String(x.id)!==String(id)); persist(); toast("Member removed. Historical transactions were retained.");
+}
 function addMember(){
   const name=document.getElementById("newMemberName").value.trim();if(!name)return toast("Enter the member name.");
   if(data.members.some(m=>m.name.toLowerCase()===name.toLowerCase()))return toast("That member already exists.");
@@ -139,7 +158,7 @@ function renderAll(){
   ["dashCash","cashTotal","reportCash"].forEach(id=>setTextIfPresent(id,peso(data.cashBalance)));
   ["dashSavings","savingsTotal","reportSavings"].forEach(id=>setTextIfPresent(id,peso(savings)));
   setTextIfPresent("memberCount",data.members.length);
-  setHtmlIfPresent("bankAccounts",data.accounts.map(a=>`<div class="account-row"><div><strong>${esc(a.name)}</strong><small>Current balance</small></div><strong>${peso(a.balance)}</strong></div>`).join("")||`<p class="empty-state">No bank accounts registered yet. Select <strong>Add Bank Account</strong> to create one.</p>`);
+  setHtmlIfPresent("bankAccounts",data.accounts.map(a=>`<div class="account-row"><div><strong>${esc(a.name)}</strong><small>Current balance</small></div><strong>${peso(a.balance)}</strong><button class="btn secondary" onclick="removeAccount(${JSON.stringify(a.id)})">Remove</button></div>`).join("")||`<p class="empty-state">No bank accounts registered yet. Select <strong>Add Bank Account</strong> to create one.</p>`);
   setHtmlIfPresent("bankRecords",data.bankRecords.slice(0,30).map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.type||"")}</td><td>${esc(r.account||"")}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${esc(r.note||"")}</td></tr>`).join("")||emptyRow(5));
   setHtmlIfPresent("cashRecords",data.cashRecords.slice(0,30).map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.type||"")}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${esc(r.note||"")}</td></tr>`).join("")||emptyRow(4));
   setHtmlIfPresent("activityRecords",data.activities.slice(0,30).map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.activity||"")}</td><td class="negative">${peso(r.amount)}</td><td>${esc(r.source||"")}</td><td>${esc(r.note||"")}</td></tr>`).join("")||emptyRow(5));
@@ -158,10 +177,10 @@ function setSavingsView(view){
 function renderSavings(){
   const selected=Number(document.getElementById("memberRecordSelect")?.value)||0;
   const m=data.members.find(x=>x.id===selected);
-  document.getElementById("selectedMemberSummary").innerHTML=m?`<div><strong>${esc(m.name)}</strong><small>Member savings balance</small></div><strong>${peso(m.balance)}</strong>`:"<span>Select a member to see their record.</span>";
+  document.getElementById("selectedMemberSummary").innerHTML=m?`<div><strong>${esc(m.name)}</strong><small>Member savings balance</small></div><strong>${peso(m.balance)}</strong><button class="btn secondary" onclick="removeMember(${JSON.stringify(m.id)})">Remove Member</button>`:"<span>Select a member to see their record.</span>";
   const single=data.savingsRecords.filter(r=>r.memberId===selected);
   document.getElementById("memberSavingsRecords").innerHTML=single.map(r=>{const i=data.savingsRecords.indexOf(r);return `<tr><td>${esc(r.date||"")}</td><td>${esc(r.type)}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${peso(r.balance)}</td><td>${esc(r.note||"")}</td><td><button class="btn secondary" onclick="openSavingsEdit(${i})">Update</button></td></tr>`}).join("")||emptyRow(6);
-  document.getElementById("allSavingsRecords").innerHTML=data.savingsRecords.map(r=>{const i=data.savingsRecords.indexOf(r),member=data.members.find(x=>x.id===r.memberId);return `<tr><td>${esc(r.date||"")}</td><td>${esc(member?.name||"Unknown")}</td><td>${esc(r.type)}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${peso(r.balance)}</td><td>${esc(r.note||"")}</td><td><button class="btn secondary" onclick="openSavingsEdit(${i})">Update</button></td></tr>`}).join("")||emptyRow(7);
+  document.getElementById("allSavingsRecords").innerHTML=data.savingsRecords.map(r=>{const i=data.savingsRecords.indexOf(r),member=data.members.find(x=>x.id===r.memberId);return `<tr><td>${esc(r.date||"")}</td><td>${esc(member?.name||r.memberName||"Removed member")}</td><td>${esc(r.type)}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${peso(r.balance)}</td><td>${esc(r.note||"")}</td><td><button class="btn secondary" onclick="openSavingsEdit(${i})">Update</button></td></tr>`}).join("")||emptyRow(7);
 }
 function selectSavingsMember(id){const sel=document.getElementById("memberRecordSelect");if(sel)sel.value=String(id);const entry=document.getElementById("savingsMember");if(entry)entry.value=String(id);setSavingsView("selected");}
 function emptyRow(n){return `<tr><td colspan="${n}" style="opacity:.45;text-align:center">No records yet.</td></tr>`}
@@ -171,7 +190,7 @@ function exportCSV(section){
   if(section==="bank"){rows=[["Date","Type","Account","Amount","Note"],...data.bankRecords.map(r=>[r.date,r.type,r.account,r.amount,r.note])]}
   if(section==="cash"){rows=[["Date","Type","Amount","Purpose"],...data.cashRecords.map(r=>[r.date,r.type,r.amount,r.note])]}
   if(section==="activities"){rows=[["Date","Activity","Amount","Paid From","Description"],...data.activities.map(r=>[r.date,r.activity,r.amount,r.source,r.note])]}
-  if(section==="savings"){rows=[["Date","Member","Type","Amount (PHP)","Note","Balance (PHP)"],...data.savingsRecords.map(r=>{const m=data.members.find(x=>x.id===r.memberId);return [r.date,m?.name||"",r.type,r.amount,r.note||"",r.balance]})]}
+  if(section==="savings"){rows=[["Date","Member","Type","Amount (PHP)","Note","Balance (PHP)"],...data.savingsRecords.map(r=>{const m=data.members.find(x=>x.id===r.memberId);return [r.date,m?.name||r.memberName||"Removed member",r.type,r.amount,r.note||"",r.balance]})]}
   const csv=rows.map(row=>row.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n");
   downloadBlob(csv,`church_${section}_report.csv`,"text/csv;charset=utf-8");
 }
