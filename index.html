@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Church Finance System - Prototype</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="brand">⛪ Church Finance System</div>
+        <div class="subtitle">Simple • Clear • Church-friendly finance management</div>
+      </div>
+      <div class="top-actions">
+        <button class="btn secondary" onclick="exportBackup()">⬇ Backup</button>
+        <button class="btn secondary" onclick="clearData()">🗑 Clear Data</button>
+        <label class="btn secondary file-btn">⬆ Restore
+          <input type="file" accept=".json" onchange="importBackup(event)">
+        </label>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="side-title">Main Menu</div>
+        <button class="nav-btn active" data-page="dashboard">🏠 Dashboard</button>
+        <button class="nav-btn" data-page="bank">🏦 Bank Management</button>
+        <button class="nav-btn" data-page="cash">💵 Cash on Hand</button>
+        <button class="nav-btn" data-page="activities">📋 Church Activities</button>
+        <button class="nav-btn" data-page="savings">💜 Fun Savings Cooperative</button>
+        <button class="nav-btn future" data-page="loans">🤝 Loans <span>Future</span></button>
+        <button class="nav-btn future" data-page="services">🛒 Load / GCash / Mart <span>Future</span></button>
+        <button class="nav-btn" data-page="reports">📊 Reports</button>
+      </aside>
+
+      <main class="content">
+        <section id="dashboard" class="page active">
+          <div class="hero">
+            <div>
+              <span class="eyebrow">CHURCH FINANCE</span>
+              <h1>Church Finance Dashboard</h1>
+              <p>Choose an area below to record or review church finances.</p>
+            </div>
+            <div class="hero-icon">✦</div>
+          </div>
+
+          <div class="cards">
+            <div class="balance-card bank"><span>🏦 Bank Balance</span><strong id="dashBank">₱0.00</strong><small>All church bank accounts</small></div>
+            <div class="balance-card cash"><span>💵 Cash on Hand</span><strong id="dashCash">₱0.00</strong><small>Physical cash</small></div>
+            <div class="balance-card savings"><span>💜 Fun Savings Cooperative</span><strong id="dashSavings">₱0.00</strong><small>Member savings</small></div>
+          </div>
+
+          <h2>What do you want to do?</h2>
+          <div class="action-grid">
+            <button class="action-card" onclick="go('bank')"><b>🏦 Bank Management</b><span>Deposit, withdrawal, transfer, balance</span></button>
+            <button class="action-card" onclick="go('cash')"><b>💵 Cash on Hand</b><span>Track physical church cash</span></button>
+            <button class="action-card" onclick="go('activities')"><b>📋 Church Activities</b><span>Maintenance, projects, food, anniversary</span></button>
+            <button class="action-card" onclick="go('savings')"><b>💜 Fun Savings Cooperative</b><span>Members and weekly savings</span></button>
+          </div>
+
+          <div class="info-box">
+            <b>Prototype mode</b>
+            <p>This version uses sample data and your browser's local storage. Nothing is connected to a real bank or shared with other users.</p>
+          </div>
+        </section>
+
+        <section id="bank" class="page">
+          <div class="page-head"><div><span class="eyebrow">STEP 1</span><h1>🏦 Bank Management</h1><p>Manage the church's actual bank balances and transactions.</p></div></div>
+          <div class="workflow"><span class="done">1 Deposit</span><span>2 Withdrawal</span><span>3 Fast Transfer</span><span>4 Update Balance</span><span>5 Review Records</span></div>
+          <div class="cards compact">
+            <div class="balance-card bank"><span>Total Bank Balance</span><strong id="bankTotal">₱0.00</strong></div>
+          </div>
+          <div class="two-col">
+            <div class="panel">
+              <h2>Bank Accounts</h2>
+              <div id="bankAccounts"></div>
+              <button class="btn primary wide" onclick="openModal('accountModal')">＋ Add Bank Account</button>
+            </div>
+            <div class="panel">
+              <h2>Quick Actions</h2>
+              <div class="quick-grid">
+                <button onclick="openBankTx('Deposit')">➕<b>Deposit</b><small>Add money to bank</small></button>
+                <button onclick="openBankTx('Withdrawal')">➖<b>Withdrawal</b><small>Money out of bank</small></button>
+                <button onclick="openBankTx('Transfer')">↔️<b>Fast Transfer</b><small>Move between banks</small></button>
+                <button onclick="openBankTx('Adjustment')">⚙️<b>Update Balance</b><small>Match verified bank balance</small></button>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h2>Recent Bank Records</h2><button class="btn secondary" onclick="exportCSV('bank')">Export Excel/CSV</button></div>
+            <div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Account</th><th>Amount</th><th>Note</th></tr></thead><tbody id="bankRecords"></tbody></table></div>
+          </div>
+        </section>
+
+        <section id="cash" class="page">
+          <div class="page-head"><span class="eyebrow">STEP 2</span><h1>💵 Cash on Hand</h1><p>Track physical church cash separately from bank money.</p></div>
+          <div class="cards compact"><div class="balance-card cash"><span>Current Cash on Hand</span><strong id="cashTotal">₱0.00</strong></div></div>
+          <div class="panel">
+            <h2>Cash Transaction</h2>
+            <div class="form-grid">
+              <label>Type<select id="cashType"><option>Cash Received</option><option>Cash Expense</option></select></label>
+              <label>Amount (₱)<input id="cashAmount" type="number" min="0" step="0.01" placeholder="0.00"></label>
+              <label>Purpose<input id="cashNote" placeholder="e.g. Food Ministry"></label>
+            </div>
+            <button class="btn primary" onclick="saveCash()">Save Cash Transaction</button>
+          </div>
+          <div class="panel"><div class="panel-title"><h2>Cash Records</h2><button class="btn secondary" onclick="exportCSV('cash')">Export Excel/CSV</button></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Purpose</th></tr></thead><tbody id="cashRecords"></tbody></table></div></div>
+        </section>
+
+        <section id="activities" class="page">
+          <div class="page-head"><span class="eyebrow">STEP 3</span><h1>📋 Church Activities</h1><p>See where church money is being used.</p></div>
+          <div class="activity-grid">
+            <button onclick="selectActivity('Maintenance')">🔧<b>Maintenance</b><small>Repairs and upkeep</small></button>
+            <button onclick="selectActivity('Church Projects')">🏗️<b>Church Projects</b><small>Construction and improvements</small></button>
+            <button onclick="selectActivity('Food Ministry')">🍲<b>Food Ministry</b><small>Food and supplies</small></button>
+            <button onclick="selectActivity('Church Anniversary')">🎉<b>Church Anniversary</b><small>Anniversary expenses</small></button>
+          </div>
+          <div class="panel">
+            <h2 id="activityFormTitle">Record Activity Expense</h2>
+            <div class="form-grid">
+              <label>Activity<select id="activityType"><option>Maintenance</option><option>Church Projects</option><option>Food Ministry</option><option>Church Anniversary</option></select></label>
+              <label>Amount (₱)<input id="activityAmount" type="number" min="0" step="0.01" placeholder="0.00"></label>
+              <label>Bank Account<select id="activitySource"></select></label>
+              <label>Purpose / Description<input id="activityNote" placeholder="What was this expense for?"></label>
+            </div>
+            <button class="btn primary" onclick="saveActivity()">Save Expense</button>
+          </div>
+          <div class="panel"><div class="panel-title"><h2>Activity Records</h2><button class="btn secondary" onclick="exportCSV('activities')">Export Excel/CSV</button></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Activity</th><th>Amount</th><th>Paid From</th><th>Description</th></tr></thead><tbody id="activityRecords"></tbody></table></div></div>
+        </section>
+
+        <section id="savings" class="page">
+          <div class="savings-brand">
+            <div><h1>👥 Fun Savings Cooperative</h1><p>Together We Save ✝ Stronger Together</p></div>
+            <div class="savings-tagline">“Small Savings<br>Make a Big Difference”</div>
+          </div>
+          <div class="savings-tabs" role="group" aria-label="Savings views">
+            <button class="savings-tab active" id="tabMember" onclick="setSavingsView('selected')">👤 Member Record</button>
+            <button class="savings-tab" id="tabAll" onclick="setSavingsView('all')">👥 All Members</button>
+            <button class="savings-tab" onclick="document.getElementById('newMemberName').focus();document.getElementById('memberAddPanel').scrollIntoView({behavior:'smooth',block:'center'})">＋ Add Member</button>
+            <button class="savings-tab" onclick="document.getElementById('savingsMember').focus();document.getElementById('savingsEntryPanel').scrollIntoView({behavior:'smooth',block:'center'})">＋ Add Weekly Savings</button>
+          </div>
+          <div class="savings-layout">
+            <div class="savings-workflow">
+              <div class="savings-card add-member" id="memberAddPanel">
+                <h2><span class="step green">1</span> Add Member</h2><p class="card-help">Register a new member to the cooperative.</p>
+                <label>Member Name <b>*</b><input id="newMemberName" placeholder="Enter full name"></label>
+                <button class="btn green-btn wide" onclick="addMember()">＋ Add Member</button>
+              </div>
+              <div class="savings-card search-member">
+                <h2><span class="step blue">2</span> Search Member</h2><p class="card-help">Find a member and view only their records.</p>
+                <label>Choose member<select id="memberRecordSelect"><option value="">Select a registered member</option></select></label>
+                <p class="card-help">Choose a registered member to open their personal transaction record.</p>
+              </div>
+              <div class="savings-card add-savings" id="savingsEntryPanel">
+                <h2><span class="step pink">3</span> Add Weekly Savings</h2><p class="card-help">Record a weekly savings deposit.</p>
+                <div class="savings-form-grid"><label>Member <b>*</b><select id="savingsMember"></select></label><label>Transaction <b>*</b><select id="savingsTransactionType"><option value="Weekly Savings">Weekly Savings (Deposit)</option><option value="Withdrawal">Withdrawal</option></select></label><label>Amount (₱) <b>*</b><input id="savingsAmount" type="number" min="0.01" step="0.01" placeholder="0.00"></label><label>Date <b>*</b><input id="savingsDate" type="date"></label></div>
+                <label>Notes (optional)<input id="savingsNote" placeholder="e.g. Weekly savings"></label>
+                <button class="btn pink-btn wide" id="saveSavingsButton" onclick="saveSavings()">＋ Save Transaction</button>
+                <div class="note">Dividend and payout rules are not configured in this prototype.</div>
+              </div>
+            </div>
+            <div class="savings-records">
+              <div class="savings-card">
+                <div class="savings-section-head"><div><h2>Member Transaction Record</h2><p class="card-help">View, update, and export one member’s transactions.</p></div><div class="button-row"><button class="btn green-btn" onclick="exportMemberCSV()">▤ Export Excel</button></div></div>
+                <div id="selectedMemberSummary" class="selected-summary"></div>
+                <div class="table-wrap savings-table"><table><thead><tr><th>Date</th><th>Type</th><th>Amount (₱)</th><th>Balance (₱)</th><th>Notes</th><th>Action</th></tr></thead><tbody id="memberSavingsRecords"></tbody></table></div>
+              </div>
+              <div class="savings-card">
+                <div class="savings-section-head"><div><h2>All Members Transaction Record</h2><p class="card-help">View and manage transactions across all members.</p></div><div class="button-row"><button class="btn green-btn" onclick="exportCSV('savings')">▤ Export All to Excel</button><button class="btn secondary" onclick="renderSavings()">↻ Refresh</button></div></div>
+                <div class="table-wrap savings-table"><table><thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount (₱)</th><th>Balance (₱)</th><th>Notes</th><th>Action</th></tr></thead><tbody id="allSavingsRecords"></tbody></table></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="loans" class="page">
+          <div class="future-page">🤝<h1>Loans</h1><p>This module is reserved for a later phase because the church's loan process and rules have not been decided yet.</p><button class="btn primary" onclick="go('dashboard')">Back to Dashboard</button></div>
+        </section>
+
+        <section id="services" class="page">
+          <div class="future-page">🛒<h1>Load / GCash / Mart</h1><p>This module is reserved until the church's actual process for these activities is clarified.</p><button class="btn primary" onclick="go('dashboard')">Back to Dashboard</button></div>
+        </section>
+
+        <section id="reports" class="page">
+          <div class="page-head"><span class="eyebrow">REVIEW</span><h1>📊 Financial Reports</h1><p>Simple overview of the current prototype records.</p></div>
+          <div class="cards">
+            <div class="balance-card bank"><span>Bank</span><strong id="reportBank">₱0.00</strong></div>
+            <div class="balance-card cash"><span>Cash</span><strong id="reportCash">₱0.00</strong></div>
+            <div class="balance-card savings"><span>Fun Savings Cooperative</span><strong id="reportSavings">₱0.00</strong></div>
+          </div>
+          <div class="panel">
+            <h2>Data & Backup</h2>
+            <p>Use <b>Backup</b> to save a complete JSON copy of this prototype's data. Use the export buttons on each section for Excel-compatible CSV files.</p>
+            <button class="btn primary" onclick="exportBackup()">⬇ Download Full Backup</button>
+            <label class="btn secondary file-btn">⬆ Import Backup<input type="file" accept=".json,application/json" onchange="importBackup(event)"></label>
+            <button class="btn danger" onclick="clearData()">🗑 Clear All Data</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal" id="savingsEditModal"><div class="modal-box"><button class="close" onclick="closeModal('savingsEditModal')">×</button><h2>Update Savings Transaction</h2><p class="muted">Correct a record and explain the change. The member balance will be adjusted automatically.</p><input type="hidden" id="editSavingsIndex"><label>Member<select id="editSavingsMember"></select></label><div class="form-grid"><label>Date<input id="editSavingsDate" type="date"></label><label>Transaction<select id="editSavingsType"><option>Weekly Savings</option><option>Withdrawal</option></select></label><label>Amount (₱)<input id="editSavingsAmount" type="number" min="0.01" step="0.01"></label></div><label>Correction note (required)<textarea id="editSavingsNote" rows="2" placeholder="Explain what was corrected"></textarea></label><button class="btn primary wide" onclick="saveSavingsEdit()">Save Correction</button></div></div>
+  <div id="toast" class="toast"></div>
+
+  <div class="modal" id="accountModal"><div class="modal-box"><button class="close" onclick="closeModal('accountModal')">×</button><h2>Add Bank Account</h2><label>Account name<input id="newAccountName" placeholder="e.g. Church Savings Account"></label><label>Starting balance (₱)<input id="newAccountBalance" type="number" min="0" step="0.01" placeholder="0.00"></label><button class="btn primary wide" onclick="addAccount()">Add Account</button></div></div>
+
+  <div class="modal" id="bankModal"><div class="modal-box"><button class="close" onclick="closeModal('bankModal')">×</button><h2 id="bankModalTitle">Bank Transaction</h2><div class="form-grid"><label>Type<select id="bankTxType"><option>Deposit</option><option>Withdrawal</option><option>Transfer</option><option>Adjustment</option></select></label><label>Account<select id="bankAccount"></select></label><label>Amount (₱)<input id="bankAmount" type="number" min="0" step="0.01"></label><label id="destWrap">Destination Account<select id="bankDestination"></select></label><label>Note<input id="bankNote" placeholder="Required for adjustments"></label></div><button class="btn primary wide" onclick="saveBankTx()">Save Transaction</button></div></div>
+
+  <div class="modal" id="memberModal"><div class="modal-box"><button class="close" onclick="closeModal('memberModal')">×</button><h2>Add Fun Savings Cooperative Member</h2><label>Member name<input id="newMemberName" placeholder="Full name"></label><button class="btn primary wide" onclick="addMember()">Add Member</button></div></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
