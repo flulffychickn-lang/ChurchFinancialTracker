@@ -46,6 +46,20 @@ function removeAccount(id){
   if(typed!=="DELETE")return toast("Removal cancelled. You must type DELETE exactly.");
   data.accounts=data.accounts.filter(x=>String(x.id)!==String(id)); persist(); toast("Bank account removed. Historical records were kept.");
 }
+function renameAccount(id){
+  const a=data.accounts.find(x=>String(x.id)===String(id)); if(!a)return toast("Bank account not found.");
+  const oldName=a.name;
+  const next=prompt(`Update bank account name\n\nCurrent name: ${oldName}\n\nEnter the correct account name:`);
+  if(next===null)return;
+  const name=String(next).trim();
+  if(!name)return toast("Account name cannot be empty.");
+  if(name.toLowerCase()===oldName.toLowerCase())return toast("No account name change was made.");
+  if(data.accounts.some(x=>String(x.id)!==String(id)&&String(x.name||"").trim().toLowerCase()===name.toLowerCase()))return toast("That bank account name already exists.");
+  a.name=name;
+  data.bankRecords.forEach(r=>{if(String(r.account||"")===oldName)r.account=name;});
+  data.activities.forEach(r=>{if(String(r.source||"")===oldName)r.source=name;});
+  persist(); toast("Bank account name updated.");
+}
 function addAccount(){
   const nameEl=document.getElementById("newAccountName");
   const balanceEl=document.getElementById("newAccountBalance");
@@ -134,6 +148,19 @@ function removeMember(id){
   data.savingsRecords.forEach(r=>{if(String(r.memberId)===String(id)&&!r.memberName)r.memberName=m.name;});
   data.members=data.members.filter(x=>String(x.id)!==String(id)); persist(); toast("Member removed. Historical transactions were retained.");
 }
+function renameMember(id){
+  const m=data.members.find(x=>String(x.id)===String(id)); if(!m)return toast("Member not found.");
+  const oldName=m.name;
+  const next=prompt(`Update member name\n\nCurrent name: ${oldName}\n\nEnter the correct member name:`);
+  if(next===null)return;
+  const name=String(next).trim();
+  if(!name)return toast("Member name cannot be empty.");
+  if(name.toLowerCase()===oldName.toLowerCase())return toast("No member name change was made.");
+  if(data.members.some(x=>String(x.id)!==String(id)&&String(x.name||"").trim().toLowerCase()===name.toLowerCase()))return toast("That member already exists.");
+  m.name=name;
+  data.savingsRecords.forEach(r=>{if(String(r.memberId)===String(id))r.memberName=name;});
+  persist(); toast("Member name updated.");
+}
 function addMember(){
   const name=document.getElementById("newMemberName").value.trim();if(!name)return toast("Enter the member name.");
   if(data.members.some(m=>m.name.toLowerCase()===name.toLowerCase()))return toast("That member already exists.");
@@ -158,7 +185,7 @@ function renderAll(){
   ["dashCash","cashTotal","reportCash"].forEach(id=>setTextIfPresent(id,peso(data.cashBalance)));
   ["dashSavings","savingsTotal","reportSavings"].forEach(id=>setTextIfPresent(id,peso(savings)));
   setTextIfPresent("memberCount",data.members.length);
-  setHtmlIfPresent("bankAccounts",data.accounts.map(a=>`<div class="account-row"><div><strong>${esc(a.name)}</strong><small>Current balance</small></div><strong>${peso(a.balance)}</strong><button class="btn secondary" onclick="removeAccount(${JSON.stringify(a.id)})">Remove</button></div>`).join("")||`<p class="empty-state">No bank accounts registered yet. Select <strong>Add Bank Account</strong> to create one.</p>`);
+  setHtmlIfPresent("bankAccounts",data.accounts.map(a=>`<div class="account-row"><div><strong>${esc(a.name)}</strong><small>Current balance</small></div><strong>${peso(a.balance)}</strong><div class="button-row"><button class="btn secondary" onclick="renameAccount(${JSON.stringify(a.id)})">✎ Update Name</button><button class="btn secondary" onclick="removeAccount(${JSON.stringify(a.id)})">Remove</button></div></div>`).join("")||`<p class="empty-state">No bank accounts registered yet. Select <strong>Add Bank Account</strong> to create one.</p>`);
   setHtmlIfPresent("bankRecords",data.bankRecords.slice(0,30).map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.type||"")}</td><td>${esc(r.account||"")}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${esc(r.note||"")}</td></tr>`).join("")||emptyRow(5));
   setHtmlIfPresent("cashRecords",data.cashRecords.slice(0,30).map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.type||"")}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${esc(r.note||"")}</td></tr>`).join("")||emptyRow(4));
   setHtmlIfPresent("activityRecords",data.activities.slice(0,30).map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.activity||"")}</td><td class="negative">${peso(r.amount)}</td><td>${esc(r.source||"")}</td><td>${esc(r.note||"")}</td></tr>`).join("")||emptyRow(5));
@@ -177,7 +204,7 @@ function setSavingsView(view){
 function renderSavings(){
   const selected=Number(document.getElementById("memberRecordSelect")?.value)||0;
   const m=data.members.find(x=>x.id===selected);
-  document.getElementById("selectedMemberSummary").innerHTML=m?`<div><strong>${esc(m.name)}</strong><small>Member savings balance</small></div><strong>${peso(m.balance)}</strong><button class="btn secondary" onclick="removeMember(${JSON.stringify(m.id)})">Remove Member</button>`:"<span>Select a member to see their record.</span>";
+  document.getElementById("selectedMemberSummary").innerHTML=m?`<div><strong>${esc(m.name)}</strong><small>Member savings balance</small></div><strong>${peso(m.balance)}</strong><div class="button-row"><button class="btn secondary" onclick="renameMember(${JSON.stringify(m.id)})">✎ Update Name</button><button class="btn secondary" onclick="removeMember(${JSON.stringify(m.id)})">Remove Member</button></div>`:"<span>Select a member to see their record.</span>";
   const single=data.savingsRecords.filter(r=>r.memberId===selected);
   document.getElementById("memberSavingsRecords").innerHTML=single.map(r=>{const i=data.savingsRecords.indexOf(r);return `<tr><td>${esc(r.date||"")}</td><td>${esc(r.type)}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${peso(r.balance)}</td><td>${esc(r.note||"")}</td><td><button class="btn secondary" onclick="openSavingsEdit(${i})">Update</button></td></tr>`}).join("")||emptyRow(6);
   document.getElementById("allSavingsRecords").innerHTML=data.savingsRecords.map(r=>{const i=data.savingsRecords.indexOf(r),member=data.members.find(x=>x.id===r.memberId);return `<tr><td>${esc(r.date||"")}</td><td>${esc(member?.name||r.memberName||"Removed member")}</td><td>${esc(r.type)}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${peso(r.balance)}</td><td>${esc(r.note||"")}</td><td><button class="btn secondary" onclick="openSavingsEdit(${i})">Update</button></td></tr>`}).join("")||emptyRow(7);
@@ -185,12 +212,32 @@ function renderSavings(){
 function selectSavingsMember(id){const sel=document.getElementById("memberRecordSelect");if(sel)sel.value=String(id);const entry=document.getElementById("savingsMember");if(entry)entry.value=String(id);setSavingsView("selected");}
 function emptyRow(n){return `<tr><td colspan="${n}" style="opacity:.45;text-align:center">No records yet.</td></tr>`}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function sortChronological(records){
+  return [...records].sort((a,b)=>{
+    const da=String(a.date||""); const db=String(b.date||"");
+    return da.localeCompare(db) || String(a.id||"").localeCompare(String(b.id||""));
+  });
+}
 function exportCSV(section){
   let rows=[];
-  if(section==="bank"){rows=[["Date","Type","Account","Amount","Note"],...data.bankRecords.map(r=>[r.date,r.type,r.account,r.amount,r.note])]}
-  if(section==="cash"){rows=[["Date","Type","Amount","Purpose"],...data.cashRecords.map(r=>[r.date,r.type,r.amount,r.note])]}
-  if(section==="activities"){rows=[["Date","Activity","Amount","Paid From","Description"],...data.activities.map(r=>[r.date,r.activity,r.amount,r.source,r.note])]}
-  if(section==="savings"){rows=[["Date","Member","Type","Amount (PHP)","Note","Balance (PHP)"],...data.savingsRecords.map(r=>{const m=data.members.find(x=>x.id===r.memberId);return [r.date,m?.name||r.memberName||"Removed member",r.type,r.amount,r.note||"",r.balance]})]}
+  if(section==="bank"){
+    const records=sortChronological(data.bankRecords);
+    rows=[["Date","Type","Account","Amount","Note"],...records.map(r=>[r.date,r.type,r.account,r.amount,r.note])];
+  }
+  if(section==="cash"){
+    const records=sortChronological(data.cashRecords);
+    rows=[["Date","Type","Amount","Purpose"],...records.map(r=>[r.date,r.type,r.amount,r.note])];
+  }
+  if(section==="activities"){
+    const records=sortChronological(data.activities);
+    rows=[["Date","Activity","Amount","Paid From","Description"],...records.map(r=>[r.date,r.activity,r.amount,r.source,r.note])];
+  }
+  if(section==="savings"){
+    const records=sortChronological(data.savingsRecords);
+    const total=data.members.reduce((sum,m)=>sum+(Number(m.balance)||0),0);
+    rows=[["Date","Member","Type","Amount (PHP)","Note","Balance (PHP)"],...records.map(r=>{const m=data.members.find(x=>x.id===r.memberId);return [r.date,m?.name||r.memberName||"Removed member",r.type,r.amount,r.note||"",r.balance]})];
+    rows.push([],["TOTAL SAVINGS (ALL MEMBERS)","","","",total,total]);
+  }
   const csv=rows.map(row=>row.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n");
   downloadBlob(csv,`church_${section}_report.csv`,"text/csv;charset=utf-8");
 }
@@ -202,7 +249,10 @@ document.getElementById("memberRecordSelect")?.addEventListener("change",()=>{co
 function exportMemberCSV(){
  const mid=Number(document.getElementById("memberRecordSelect").value),m=data.members.find(x=>x.id===mid);
  if(!m)return toast("Select a member first.");
- const rows=[["Date","Member","Transaction","Amount (PHP)","Note","Balance (PHP)"],...data.savingsRecords.filter(r=>r.memberId===mid).map(r=>[r.date,m.name,r.type,r.amount,r.note||"",r.balance])];
+ const records=sortChronological(data.savingsRecords.filter(r=>r.memberId===mid));
+ const total=records.reduce((sum,r)=>sum+(Number(r.amount)||0),0);
+ const rows=[["Date","Member","Transaction","Amount (PHP)","Note","Balance (PHP)"],...records.map(r=>[r.date,m.name,r.type,r.amount,r.note||"",r.balance])];
+ rows.push([],["TOTAL SAVINGS",m.name,"","", "", total]);
  const csv=rows.map(row=>row.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n");
  downloadBlob(csv,`fun_savings_${m.name.replace(/[^a-z0-9_-]+/gi,"_")}_report.csv`,"text/csv;charset=utf-8");
 }
