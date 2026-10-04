@@ -81,12 +81,14 @@ function addAccount(){
 
 function fillAccountSelects(){
   const opts=data.accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("");
-  ["bankAccount","bankDestination","activitySource"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+  ["bankAccount","bankDestination"].forEach(id=>{const el=document.getElementById(id);if(el){const old=el.value;el.innerHTML=opts;if([...el.options].some(o=>o.value===old))el.value=old;}});
+  const activitySource=document.getElementById("activitySource");
+  if(activitySource){const old=activitySource.value;activitySource.innerHTML='<option value="cash">Grace Giving – Cash on Hand</option>'+data.accounts.map(a=>`<option value="bank:${a.id}">${esc(a.name)}</option>`).join("");if([...activitySource.options].some(o=>o.value===old))activitySource.value=old;}
   const memberOpts=data.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join("");
   ["savingsMember","memberRecordSelect"].forEach(id=>{const el=document.getElementById(id);if(el){const old=el.value;el.innerHTML=(id==="memberRecordSelect"?'<option value="">Select a registered member</option>':'<option value="">Select a member</option>')+memberOpts;if([...el.options].some(o=>o.value===old))el.value=old;}});
 }
 function openBankTx(type){
-  fillAccountSelects();document.getElementById("bankTxType").value=type;document.getElementById("bankModalTitle").textContent=type==="Transfer"?"Fast Bank Transfer":type+" Bank Balance";toggleDest();openModal("bankModal")
+  fillAccountSelects();document.getElementById("bankTxDate").value=today();document.getElementById("bankTxType").value=type;document.getElementById("bankModalTitle").textContent=type==="Transfer"?"Fast Bank Transfer":type+" Bank Balance";toggleDest();openModal("bankModal")
 }
 document.getElementById("bankTxType").addEventListener("change",toggleDest);
 function toggleDest(){document.getElementById("destWrap").style.display=document.getElementById("bankTxType").value==="Transfer"?"flex":"none"}
@@ -97,13 +99,14 @@ function saveBankTx(){
   const rawAmount=String(document.getElementById("bankAmount")?.value??"").trim();
   const amt=rawAmount===""?NaN:Number(rawAmount);
   const note=String(document.getElementById("bankNote")?.value||"").trim();
+  const date=document.getElementById("bankTxDate")?.value||"";
+  if(!date)return toast("Select the transaction date.");
   if(type==="Adjustment"&&!note)return toast("Adjustment note is required.");
   if(!rawId)return toast("Add or select a bank account first.");
   if(!Number.isFinite(amt)||amt<0||(amt===0&&type!=="Adjustment"))return toast("Please enter a valid amount greater than zero.");
   const a=data.accounts.find(x=>Number(x.id)===id);
   if(!a)return toast("Selected bank account was not found. Please reopen the form.");
   a.balance=Number(a.balance)||0;
-  const date=today();
   if(type==="Deposit"){
     a.balance+=amt;data.bankRecords.unshift({id:Date.now()+Math.random(),date,type,account:a.name,amount:amt,note:note||"Bank deposit"});
   }else if(type==="Withdrawal"){
@@ -119,25 +122,43 @@ function saveBankTx(){
     const diff=amt-a.balance;a.balance=amt;
     data.bankRecords.unshift({id:Date.now()+Math.random(),date,type:"Balance Adjustment",account:a.name,amount:diff,note});
   }else return toast("Unknown transaction type.");
-  document.getElementById("bankAmount").value="";document.getElementById("bankNote").value="";
+  document.getElementById("bankAmount").value="";document.getElementById("bankNote").value="";document.getElementById("bankTxDate").value=today();
   closeModal("bankModal");persist();toast("Bank transaction saved with account, amount, date, and note.");
 }
 
 function saveCash(){
-  const type=document.getElementById("cashType").value,amt=Number(document.getElementById("cashAmount").value||0),note=document.getElementById("cashNote").value.trim();
-  if(amt<=0)return toast("Enter an amount.");
-  if(type==="Cash Expense"&&data.cashBalance<amt)return toast("Expense is greater than cash on hand.");
-  data.cashBalance += type==="Cash Received"?amt:-amt;
-  data.cashRecords.unshift({date:today(),type,amount:type==="Cash Received"?amt:-amt,note});
-  document.getElementById("cashAmount").value="";document.getElementById("cashNote").value="";persist();toast("Cash record saved.")
+  const type=document.getElementById("cashRecordType")?.value||"Offering";
+  const raw=String(document.getElementById("cashAmount")?.value??"").trim(),amt=Number(raw);
+  const date=document.getElementById("cashDate")?.value,note=String(document.getElementById("cashNote")?.value||"").trim();
+  if(!date)return toast("Select the collection date.");
+  if(!raw||!Number.isFinite(amt)||amt<=0)return toast("Enter a collection amount greater than zero.");
+  data.cashBalance=(Number(data.cashBalance)||0)+amt;data.collectionBalance=(Number(data.collectionBalance)||0)+amt;
+  const rec={id:Date.now()+Math.random(),date,type,amount:amt,note};data.cashRecords.unshift(rec);
+  // Allocate the full recorded collection across activity budgets immediately.
+  let allocated=0;
+  COLLECTION_SPLITS.forEach(([name,pct],i)=>{const share=i===COLLECTION_SPLITS.length-1?Math.round((amt-allocated)*100)/100:Math.round((amt*pct/100)*100)/100;allocated+=share;data.collectionAllocations[name]=(Number(data.collectionAllocations[name])||0)+share;data.collectionRecords.unshift({id:Date.now()+Math.random(),date,type:"Collection Allocation",category:name,amount:share,note:`${type} distribution (${pct}%)`});});
+  document.getElementById("cashAmount").value="";document.getElementById("cashNote").value="";persist();toast(`${type} recorded and allocated to Church Activities.`);
 }
-function selectActivity(name){document.getElementById("activityType").value=name;document.getElementById("activityAmount").focus()}
+function selectActivity(name){const el=document.getElementById("activityType");if(el)el.value=name;updateActivityFormHint();document.getElementById("activityAmount")?.focus()}
+function updateActivityFormHint(){const type=document.getElementById("activityType")?.value||"";const special=["Pastor’s Allocation","Music Director"].includes(type);const label=document.getElementById("activityPurposeLabel");if(label){label.innerHTML=special?'Description (optional)<input id="activityNote" placeholder="Optional takeaway details">':'<span class="required-label-text">Purpose</span><input id="activityNote" required placeholder="What was this expense for?">';}const source=document.getElementById("activitySource");if(special&&source)source.value="cash";const hint=document.getElementById("activityFormHint");if(hint)hint.textContent=special?"Record the withdrawal date and amount taken from this allocation. Paid from Grace Giving – Cash on Hand; description is optional.":"Enter the purpose, date, amount, and payment source. The selected activity balance will decrease.";}
 function saveActivity(){
-  const type=document.getElementById("activityType").value,amt=Number(document.getElementById("activityAmount").value||0),sourceId=Number(document.getElementById("activitySource").value),sourceAccount=data.accounts.find(a=>a.id===sourceId),source=sourceAccount?.name||"",note=document.getElementById("activityNote").value.trim();
-  if(amt<=0)return toast("Enter an expense amount.");
-  if(!sourceAccount)return toast("Add or select a bank account first.");if(sourceAccount.balance<amt)return toast("Not enough money in the selected bank account.");sourceAccount.balance-=amt;data.bankRecords.unshift({date:today(),type:"Activity Expense",account:sourceAccount.name,amount:-amt,note:type+": "+note})
-  data.activities.unshift({date:today(),activity:type,amount:-amt,source,note});document.getElementById("activityAmount").value="";document.getElementById("activityNote").value="";persist();toast("Activity expense recorded.")
+  const type=document.getElementById("activityType").value,raw=String(document.getElementById("activityAmount").value??"").trim(),amt=Number(raw),note=document.getElementById("activityNote").value.trim(),date=document.getElementById("activityDate")?.value,source=document.getElementById("activitySource")?.value||"cash";
+  const special=["Pastor’s Allocation","Music Director"].includes(type);
+  if(!date)return toast("Select the activity date.");
+  if(!raw||!Number.isFinite(amt)||amt<=0)return toast("Enter an expense or takeaway amount greater than zero.");
+  if(!special&&!note)return toast("Purpose is required for activity expenses.");
+  const available=Number(data.collectionAllocations[type]||0);if(amt>available)return toast("Amount exceeds the available allocation for this activity.");
+  if(source==="cash"&&amt>Number(data.cashBalance||0))return toast("Amount exceeds Grace Giving – Cash on Hand.");
+  if(source.startsWith("bank:") ){const account=data.accounts.find(a=>String(a.id)===source.slice(5));if(!account)return toast("Select a valid bank account.");if(amt>Number(account.balance||0))return toast("Amount exceeds the selected bank account balance.");}
+  data.collectionAllocations[type]=available-amt;
+  data.collectionBalance-=amt;if(source==="cash")data.cashBalance-=amt;
+  let sourceLabel="Grace Giving – Cash on Hand";
+  if(source.startsWith("bank:")){const account=data.accounts.find(a=>String(a.id)===source.slice(5));account.balance-=amt;sourceLabel=account.name;data.bankRecords.unshift({id:Date.now()+Math.random(),date,type:"Activity Expense",account:account.name,amount:-amt,note:note||type,activityId:null});}
+  const r={id:Date.now()+Math.random(),date,activity:type,amount:-amt,source:sourceLabel,sourceKey:source,note,recordType:special?"Takeaway / Withdrawal":"Activity Expense"};
+  data.activities.unshift(r);data.collectionRecords.unshift({id:Date.now()+Math.random(),date,type:r.recordType,category:type,amount:-amt,note:note||"Takeaway recorded"});
+  document.getElementById("activityAmount").value="";document.getElementById("activityNote").value="";persist();toast(special?"Takeaway recorded and allocation updated.":"Activity expense recorded and allocation updated.");
 }
+
 function removeMember(id){
   const m=data.members.find(x=>String(x.id)===String(id)); if(!m)return toast("Member not found.");
   const balance=Number(m.balance)||0;
@@ -180,18 +201,20 @@ function setTextIfPresent(id,value){const el=document.getElementById(id);if(el)e
 function setHtmlIfPresent(id,value){const el=document.getElementById(id);if(el)el.innerHTML=value}
 function renderAll(){
   fillAccountSelects();
-  const bank=data.accounts.reduce((s,a)=>s+(Number(a.balance)||0),0), savings=data.members.reduce((s,m)=>s+(Number(m.balance)||0),0);
+  const bank=data.accounts.reduce((sum,a)=>sum+(Number(a.balance)||0),0),savings=data.members.reduce((sum,m)=>sum+(Number(m.balance)||0),0);
+  const collected=data.cashRecords.filter(r=>["Offering","Donation"].includes(r.type)).reduce((sum,r)=>sum+(Number(r.amount)||0),0);
   ["dashBank","bankTotal","reportBank"].forEach(id=>setTextIfPresent(id,peso(bank)));
   ["dashCash","cashTotal","reportCash"].forEach(id=>setTextIfPresent(id,peso(data.cashBalance)));
+  ["dashCollected","cashCollectedTotal"].forEach(id=>setTextIfPresent(id,peso(collected)));
   ["dashSavings","savingsTotal","reportSavings"].forEach(id=>setTextIfPresent(id,peso(savings)));
   setTextIfPresent("memberCount",data.members.length);
-  setHtmlIfPresent("bankAccounts",data.accounts.map(a=>`<div class="account-row"><div><strong>${esc(a.name)}</strong><small>Current balance</small></div><strong>${peso(a.balance)}</strong><div class="button-row"><button class="btn secondary" onclick="renameAccount(${JSON.stringify(a.id)})">✎ Update Name</button><button class="btn secondary" onclick="removeAccount(${JSON.stringify(a.id)})">Remove</button></div></div>`).join("")||`<p class="empty-state">No bank accounts registered yet. Select <strong>Add Bank Account</strong> to create one.</p>`);
-  setHtmlIfPresent("bankRecords",data.bankRecords.slice(0,30).map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.type||"")}</td><td>${esc(r.account||"")}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${esc(r.note||"")}</td></tr>`).join("")||emptyRow(5));
-  setHtmlIfPresent("cashRecords",data.cashRecords.slice(0,30).map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.type||"")}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${esc(r.note||"")}</td></tr>`).join("")||emptyRow(4));
-  setHtmlIfPresent("activityRecords",data.activities.slice(0,30).map(r=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.activity||"")}</td><td class="negative">${peso(r.amount)}</td><td>${esc(r.source||"")}</td><td>${esc(r.note||"")}</td></tr>`).join("")||emptyRow(5));
-  renderSavings();
-  toggleDest();
+  setHtmlIfPresent("bankAccounts",data.accounts.map(a=>`<div class="account-row"><div><strong>${esc(a.name)}</strong><small>Current balance</small></div><strong>${peso(a.balance)}</strong><div class="button-row"><button class="btn secondary" onclick="renameAccount(${JSON.stringify(a.id)})" title="Update account name" aria-label="Update account name">✎</button><button class="btn secondary" onclick="removeAccount(${JSON.stringify(a.id)})">Remove</button></div></div>`).join("")||`<p class="empty-state">No bank accounts registered yet. Select <strong>Add Bank Account</strong> to create one.</p>`);
+  setHtmlIfPresent("bankRecords",data.bankRecords.slice(0,50).map((r,i)=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.type||"")}</td><td>${esc(r.account||"")}</td><td class="${Number(r.amount)>=0?"positive":"negative"}">${Number(r.amount)>=0?"+":""}${peso(r.amount)}</td><td>${esc(r.note||"")}</td><td><button class="btn secondary" onclick="openBankEdit(${i})">Update</button></td></tr>`).join("")||emptyRow(6));
+  setHtmlIfPresent("cashRecords",data.cashRecords.slice(0,100).map((r,i)=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.type||"")}</td><td class="${Number(r.amount)>=0?"positive":"negative"}">${Number(r.amount)>=0?"+":""}${peso(r.amount)}</td><td>${esc(r.note||"")}</td><td><button class="btn secondary" onclick="openCashEdit(${i})">Update</button></td></tr>`).join("")||emptyRow(5));
+  setHtmlIfPresent("activityRecords",data.activities.slice(0,100).map((r,i)=>`<tr><td>${esc(r.date||"")}</td><td>${esc(r.activity||"")}</td><td class="negative">${peso(r.amount)}</td><td>${esc(r.source||"")}</td><td>${esc(r.note||"")}</td><td><button class="btn secondary" onclick="openActivityEdit(${i})">Update</button></td></tr>`).join("")||emptyRow(6));
+  renderSavings();toggleDest();renderCollectionPanels();
 }
+
 function setSavingsView(view){
   const memberTab=document.getElementById("tabMember"),allTab=document.getElementById("tabAll");
   memberTab?.classList.toggle("active",view==="selected");allTab?.classList.toggle("active",view==="all");
@@ -204,7 +227,7 @@ function setSavingsView(view){
 function renderSavings(){
   const selected=Number(document.getElementById("memberRecordSelect")?.value)||0;
   const m=data.members.find(x=>x.id===selected);
-  document.getElementById("selectedMemberSummary").innerHTML=m?`<div><strong>${esc(m.name)}</strong><small>Member savings balance</small></div><strong>${peso(m.balance)}</strong><div class="button-row"><button class="btn secondary" onclick="renameMember(${JSON.stringify(m.id)})">✎ Update Name</button><button class="btn secondary" onclick="removeMember(${JSON.stringify(m.id)})">Remove Member</button></div>`:"<span>Select a member to see their record.</span>";
+  document.getElementById("selectedMemberSummary").innerHTML=m?`<div><strong>${esc(m.name)}</strong><small>Member savings balance</small></div><strong>${peso(m.balance)}</strong><div class="button-row"><button class="btn secondary" onclick="renameMember(${JSON.stringify(m.id)})" title="Update account name" aria-label="Update account name">✎</button><button class="btn secondary" onclick="removeMember(${JSON.stringify(m.id)})">Remove Member</button></div>`:"<span>Select a member to see their record.</span>";
   const single=data.savingsRecords.filter(r=>r.memberId===selected);
   document.getElementById("memberSavingsRecords").innerHTML=single.map(r=>{const i=data.savingsRecords.indexOf(r);return `<tr><td>${esc(r.date||"")}</td><td>${esc(r.type)}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${peso(r.balance)}</td><td>${esc(r.note||"")}</td><td><button class="btn secondary" onclick="openSavingsEdit(${i})">Update</button></td></tr>`}).join("")||emptyRow(6);
   document.getElementById("allSavingsRecords").innerHTML=data.savingsRecords.map(r=>{const i=data.savingsRecords.indexOf(r),member=data.members.find(x=>x.id===r.memberId);return `<tr><td>${esc(r.date||"")}</td><td>${esc(member?.name||r.memberName||"Removed member")}</td><td>${esc(r.type)}</td><td class="${r.amount>=0?"positive":"negative"}">${r.amount>=0?"+":""}${peso(r.amount)}</td><td>${peso(r.balance)}</td><td>${esc(r.note||"")}</td><td><button class="btn secondary" onclick="openSavingsEdit(${i})">Update</button></td></tr>`}).join("")||emptyRow(7);
@@ -276,12 +299,116 @@ function saveSavingsEdit(){
 }
 document.getElementById("savingsTransactionType")?.addEventListener("change",()=>{const t=document.getElementById("savingsTransactionType").value;document.getElementById("saveSavingsButton").textContent=t==="Withdrawal"?"− Record Withdrawal":"＋ Save Weekly Savings";});
 if(document.getElementById("savingsDate"))document.getElementById("savingsDate").value=today();
-renderAll();setSavingsView("selected");
 
 function clearData(){
   if(!confirm("Clear ALL church finance records saved in this browser? This cannot be undone. Download a backup first if you may need these records.")) return;
   localStorage.removeItem(KEY);
-  data={accounts:[],bankRecords:[],cashBalance:0,cashRecords:[],activities:[],members:[],savingsRecords:[]};
+  data={accounts:[],bankRecords:[],cashBalance:0,cashRecords:[],activities:[],members:[],savingsRecords:[],collectionBalance:0,collectionAllocations:Object.fromEntries(COLLECTION_SPLITS.map(([n])=>[n,0])),collectionRecords:[]};
   persist();
   toast("All local data cleared.");
 }
+
+// Church collection allocation workflow. Percentages are applied to each amount allocated.
+let COLLECTION_SPLITS=[['Pastor’s Allocation',40],['Church Anniversary',20],['Music Director',5],['Maintenance',10],['Food Ministry',10],['Other’s',15]];
+data.collectionBalance=Number(data.collectionBalance)||0;
+data.collectionAllocations=data.collectionAllocations||Object.fromEntries(COLLECTION_SPLITS.map(([n])=>[n,0]));
+if(data.collectionAllocations['Christmas and Anniversary']!==undefined && data.collectionAllocations['Church Anniversary']===undefined){data.collectionAllocations['Church Anniversary']=Number(data.collectionAllocations['Christmas and Anniversary'])||0;delete data.collectionAllocations['Christmas and Anniversary'];}
+data.collectionRecords=Array.isArray(data.collectionRecords)?data.collectionRecords:[];
+if(data.collectionPercentages && typeof data.collectionPercentages === "object") COLLECTION_SPLITS=COLLECTION_SPLITS.map(([n])=>[n,Number(data.collectionPercentages[n] ?? (n==='Church Anniversary'?data.collectionPercentages['Christmas and Anniversary']:0) ?? 0)]);
+const SECTION_INFO = {
+  dashboard: {
+    title: "Dashboard Information",
+    body: "<p>View a summary of the church’s recorded finances, including bank balances, Grace Giving cash, collected money, and Fun Savings totals.</p><ul><li>Use the menu to open a section and enter or review its records.</li><li>Use Backup before major changes and Restore to load a previously saved backup.</li><li>Clear Data permanently removes this browser’s saved tracker data after confirmation.</li></ul>"
+  },
+  cash: {
+    title: "Grace Giving – Cash on Hand",
+    body: "<p>Record counted offerings and donations received by the church, including the date and amount.</p><ul><li>Cash collections update the Cash on Hand balance and collection totals.</li><li>Use Transfer to Bank only after physically depositing the cash; the matching cash and bank records are created.</li><li>Correct an existing record through its edit action and provide the required correction note.</li></ul>"
+  },
+  bank: {
+    title: "Bank Management Information",
+    body: "<p>Manage church bank accounts and record deposits, withdrawals, transfers, and balance adjustments.</p><ul><li>Choose the correct account and transaction date before saving.</li><li>Verify amounts against the bank statement or receipt.</li><li>Use account records to review activity. Keep a backup before major account changes.</li></ul>"
+  },
+  activities: {
+    title: "Church Activities Information",
+    body: "<p>Review allocation balances and record church expenses or approved takeaways.</p><ul><li>Select the correct activity/category, date, amount, and Paid From source.</li><li>Grace Giving – Cash on Hand and eligible allocation sources are shown where applicable.</li><li>When correcting a saved activity record, enter a clear correction note.</li></ul>"
+  },
+  savings: {
+    title: "Fun Savings Cooperative Information",
+    body: "<p>Manage cooperative members and record their weekly savings or withdrawals.</p><ul><li>Select the member and verify the transaction date and amount.</li><li>Review member-specific records and the all-members transaction history.</li><li>Use the correction workflow for edits and keep exported records as needed.</li></ul>"
+  },
+  reports: {
+    title: "Reports Information",
+    body: "<p>Review and export recorded financial activity for checking, filing, and sharing with authorized church leaders.</p><ul><li>Confirm the selected date range and totals before relying on a report.</li><li>Export a backup regularly and store it in a secure location.</li><li>Reports reflect records entered into this browser-based tracker.</li></ul>"
+  },
+  loans: {
+    title: "Loans Information",
+    body: "<p>The Loans section is reserved for a future feature and is not currently active. Do not record loan transactions here.</p>"
+  },
+  services: {
+    title: "Load / GCash / Mart Information",
+    body: "<p>This section is reserved for a future feature and is not currently active. Do not record transactions here yet.</p>"
+  }
+};
+function showSectionInfo(){
+  const active=document.querySelector(".nav-btn.active");
+  const page=active?.dataset.page||"dashboard";
+  const info=SECTION_INFO[page]||SECTION_INFO.dashboard;
+  document.getElementById("sectionInfoTitle").textContent=info.title;
+  document.getElementById("sectionInfoContent").innerHTML=info.body;
+  openModal("instructionsModal");
+}
+function showInstructions(){showSectionInfo();}
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape"){
+    const modal=document.getElementById("instructionsModal");
+    if(modal?.classList.contains("open")) closeModal("instructionsModal");
+  }
+});
+function transferCashToBank(){
+  const id=Number(document.getElementById('cashTransferBank').value),raw=String(document.getElementById('cashTransferAmount').value||'').trim(),amt=Number(raw),a=data.accounts.find(x=>Number(x.id)===id),date=document.getElementById('cashTransferDate').value,note=document.getElementById('cashTransferNote').value.trim();
+  if(!date)return toast('Select the transfer date.');if(!a)return toast('Select a bank account.');if(!raw||!Number.isFinite(amt)||amt<=0||amt>data.cashBalance)return toast('Enter an amount within Cash on Hand.');
+  const linkId=Date.now()+Math.random();data.cashBalance-=amt;a.balance=(Number(a.balance)||0)+amt;
+  data.cashRecords.unshift({id:linkId,date,type:'Cash Transferred to Bank',amount:-amt,note:note||'Deposited to '+a.name,linkedBankAccount:a.name});
+  data.bankRecords.unshift({id:Date.now()+Math.random(),linkId,date,type:'Cash Deposit',account:a.name,amount:amt,note:note||'Transferred from Cash on Hand'});
+  document.getElementById('cashTransferAmount').value='';document.getElementById('cashTransferNote').value='';persist();toast('Cash transfer recorded in both cash and bank records.');
+}
+function openAllocationSettings(){const host=document.getElementById('allocationInputs');host.innerHTML=COLLECTION_SPLITS.map(([name,pct],i)=>`<label>${esc(name)} (%)<input type="number" min="0" max="100" step="0.01" id="allocationPct${i}" value="${pct}"></label>`).join('');openModal('allocationModal')}
+function saveAllocationSettings(){const vals=COLLECTION_SPLITS.map(([name],i)=>Number(document.getElementById(`allocationPct${i}`).value));if(vals.some(v=>!Number.isFinite(v)||v<0||v>100))return toast('Enter percentages from 0 to 100.');const total=vals.reduce((a,b)=>a+b,0);if(Math.abs(total-100)>0.001)return toast(`Percentages must total 100%. Current total: ${total.toFixed(2)}%.`);COLLECTION_SPLITS=COLLECTION_SPLITS.map(([n],i)=>[n,vals[i]]);data.collectionPercentages=Object.fromEntries(COLLECTION_SPLITS);closeModal('allocationModal');persist();toast('Allocation percentages saved for future collections.')}
+function renderCollectionPanels(){
+ const alloc=document.getElementById('collectionAllocations');if(alloc)alloc.innerHTML=COLLECTION_SPLITS.map(([name,pct])=>{const balance=Number(data.collectionAllocations[name])||0;const spent=data.activities.filter(r=>r.activity===name).reduce((sum,r)=>sum+Math.abs(Number(r.amount)||0),0);return `<div class="allocation-item"><strong>${esc(name)}</strong><span>${pct}% allocation</span><b>Remaining: ${peso(balance)}</b><small>Recorded expenses/takeaways: ${peso(spent)}</small></div>`}).join('');
+ const rec=document.getElementById('collectionRecords');if(rec)rec.innerHTML=data.collectionRecords.slice(0,60).map(r=>`<tr><td>${esc(r.date||'')}</td><td>${esc(r.category||r.type||'')}</td><td class="${Number(r.amount)>=0?'positive':'negative'}">${Number(r.amount)>=0?'+':''}${peso(r.amount)}</td><td>${esc(r.type||'')} — ${esc(r.note||'')}</td></tr>`).join('')||emptyRow(4);
+ const bankSel=document.getElementById('cashTransferBank');if(bankSel){const old=bankSel.value;bankSel.innerHTML='<option value="">Select bank account</option>'+data.accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('');if([...bankSel.options].some(o=>o.value===old))bankSel.value=old;}
+}
+function openCashEdit(i){const r=data.cashRecords[i];if(!r)return;if(r.type==='Cash Transferred to Bank'&&!r.linkedBankAccount)return toast('This older transfer has no linked bank reference; edit its note/date only by contacting your administrator.');document.getElementById('editCashIndex').value=i;document.getElementById('editCashDate').value=r.date||today();document.getElementById('editCashType').value=['Offering','Donation'].includes(r.type)?r.type:'Cash Transferred to Bank';document.getElementById('editCashAmount').value=Math.abs(Number(r.amount)||0);document.getElementById('editCashCorrection').value='';openModal('cashEditModal')}
+function saveCashEdit(){const i=Number(document.getElementById('editCashIndex').value),r=data.cashRecords[i];if(!r)return;const date=document.getElementById('editCashDate').value,amt=Number(document.getElementById('editCashAmount').value),correction=document.getElementById('editCashCorrection').value.trim(),newType=document.getElementById('editCashType').value;if(!correction)return toast('Correction note is required.');if(!date)return toast('Select the cash record date.');if(!Number.isFinite(amt)||amt<=0)return toast('Enter a valid amount.');const oldAmt=Number(r.amount)||0;
+ if(r.type==='Cash Transferred to Bank'){const delta=amt-Math.abs(oldAmt);const account=data.accounts.find(a=>a.name===r.linkedBankAccount);if(!account)return toast('Linked bank account was not found.');if(delta>data.cashBalance)return toast('Not enough cash to increase this transfer.');data.cashBalance-=delta;account.balance+=delta;const br=data.bankRecords.find(x=>x.linkId===r.id);if(br){br.amount+=delta;br.date=date;br.note=(br.note||'')+` | Correction: ${correction}`;}r.amount=-amt;}
+ else {const delta=amt-oldAmt;if(data.cashBalance+delta<0||data.collectionBalance+delta<0)return toast('Correction would make a cash or collection balance negative.');if(delta<0){for(const [name,pct] of COLLECTION_SPLITS){const reduction=Math.round((-delta*pct/100)*100)/100;if((Number(data.collectionAllocations[name])||0)<reduction)return toast('Cannot reduce this collection: some allocated funds have already been used.');}}data.cashBalance+=delta;data.collectionBalance+=delta;COLLECTION_SPLITS.forEach(([name,pct])=>{const share=Math.round((delta*pct/100)*100)/100;data.collectionAllocations[name]=(Number(data.collectionAllocations[name])||0)+share;});r.amount=amt;r.type=newType;}
+ r.date=date;r.note=(r.note?`${r.note} | `:'')+`Correction: ${correction}`;closeModal('cashEditModal');persist();toast('Cash record updated with correction note.')}
+function openBankEdit(i){const r=data.bankRecords[i];if(!r)return;document.getElementById('editBankIndex').value=i;document.getElementById('editBankDate').value=r.date||today();document.getElementById('editBankAmount').value=Math.abs(Number(r.amount)||0);document.getElementById('editBankDirection').value=Number(r.amount)<0?'out':'in';document.getElementById('editBankCorrection').value='';openModal('bankEditModal')}
+function saveBankEdit(){const i=Number(document.getElementById('editBankIndex').value),r=data.bankRecords[i];if(!r)return;const date=document.getElementById('editBankDate').value,amount=Number(document.getElementById('editBankAmount').value),direction=document.getElementById('editBankDirection').value,correction=document.getElementById('editBankCorrection').value.trim();if(!correction)return toast('Correction note is required.');if(!date)return toast('Select the record date.');if(!Number.isFinite(amount)||amount<=0)return toast('Enter an amount greater than ₱0.00.');const newAmount=direction==='out'?-amount:amount;const account=data.accounts.find(a=>a.name===r.account);const delta=newAmount-(Number(r.amount)||0);if(account&&Number(account.balance)+delta<0)return toast('Correction would make the bank balance negative.');if(account)account.balance=Number(account.balance)+delta;r.amount=newAmount;r.date=date;r.note=(r.note?`${r.note} | `:'')+`Correction: ${correction}`;persist();closeModal('bankEditModal');toast('Bank record updated with correction note.')}
+function openActivityEdit(i){const r=data.activities[i];if(!r)return;document.getElementById('editActivityIndex').value=i;document.getElementById('editActivityType').value=r.activity;document.getElementById('editActivityDate').value=r.date||today();document.getElementById('editActivityAmount').value=Math.abs(Number(r.amount)||0);document.getElementById('editActivitySource').value=r.sourceKey||(r.source==='Church Collection'?'collection':'cash');document.getElementById('editActivityCorrection').value='';openModal('activityEditModal')}
+function saveActivityEdit(){const i=Number(document.getElementById('editActivityIndex').value),r=data.activities[i];if(!r)return;const type=document.getElementById('editActivityType').value,date=document.getElementById('editActivityDate').value,amt=Number(document.getElementById('editActivityAmount').value),source=document.getElementById('editActivitySource').value,correction=document.getElementById('editActivityCorrection').value.trim();if(!correction)return toast('Correction note is required.');if(!date)return toast('Select the activity record date.');if(!Number.isFinite(amt)||amt<=0)return toast('Enter a valid amount.');const oldType=r.activity,oldAmt=Math.abs(Number(r.amount)||0),oldSource=r.sourceKey||'cash';data.collectionAllocations[oldType]=(Number(data.collectionAllocations[oldType])||0)+oldAmt;data.collectionBalance+=oldAmt;if(oldSource==='cash')data.cashBalance+=oldAmt;if(amt>Number(data.collectionAllocations[type]||0)){data.collectionAllocations[oldType]-=oldAmt;data.collectionBalance-=oldAmt;if(oldSource==='cash')data.cashBalance-=oldAmt;return toast('Corrected amount exceeds available allocation.');}if(source==='cash'&&amt>data.cashBalance){data.collectionAllocations[oldType]-=oldAmt;data.collectionBalance-=oldAmt;if(oldSource==='cash')data.cashBalance-=oldAmt;return toast('Corrected amount exceeds Cash on Hand.');}if(source==='collection'&&amt>data.collectionBalance){data.collectionAllocations[oldType]-=oldAmt;data.collectionBalance-=oldAmt;if(oldSource==='cash')data.cashBalance-=oldAmt;return toast('Corrected amount exceeds Church Collection.');}data.collectionAllocations[type]-=amt;data.collectionBalance-=amt;if(source==='cash')data.cashBalance-=amt;r.activity=type;r.date=date;r.amount=-amt;r.sourceKey=source;r.source=source==='cash'?'Grace Giving – Cash on Hand':'Church Collection';r.note=(r.note?`${r.note} | `:'')+`Correction: ${correction}`;persist();closeModal('activityEditModal');toast('Activity record updated with correction note.')}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  ["cashDate","cashTransferDate","activityDate","bankTxDate","savingsDate"].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=today();});
+  // Add an obvious, keyboard-accessible calendar button beside every date field,
+  // including date fields inside edit modals that are created in the page markup.
+  document.querySelectorAll('input[type="date"]').forEach((input)=>{
+    if(input.dataset.calendarButtonAdded) return;
+    input.dataset.calendarButtonAdded='true';
+    const label=input.closest('label');
+    if(label) label.classList.add('date-field-label');
+    const button=document.createElement('button');
+    button.type='button'; button.className='date-picker-button';
+    button.setAttribute('aria-label','Open date picker'); button.title='Choose date';
+    button.innerHTML='<span aria-hidden="true">▦</span><span class="date-picker-button-text">Choose date</span>';
+    button.addEventListener('click',()=>{
+      try {
+        if(typeof input.showPicker==='function') input.showPicker();
+        else { input.focus(); input.click(); }
+      } catch (_) { input.focus(); input.click(); }
+    });
+    input.insertAdjacentElement('afterend',button);
+  });
+});
+renderAll();setSavingsView("selected");

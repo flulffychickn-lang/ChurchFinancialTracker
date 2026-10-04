@@ -28,8 +28,12 @@ th{background:#203d61;color:#dceaff;opacity:1;}
 td{color:#f4f8ff;}
 .account-row,.member-row{background:#203b5d;border:1px solid #355477;}
 .future-page{background:#172f4e;border-color:#55769c;}
-/* Cash on Hand is intentionally hidden until a later phase. */
-.nav-btn[data-page="cash"], #cash, .balance-card.cash, button.action-card[onclick="go('cash')"] { display:none !important; }
+/* Cash collection is a first-step navigation page. */
+.balance-card.collection{background:linear-gradient(135deg,#a35a12,#c47a19);border-color:#f4c16b;}
+#cash .card-help{margin-top:10px;}
+#cash .two-col{align-items:start;}
+#activities .allocation-item small{color:#67558e;font-size:.82rem;}
+#activities .panel-title .card-help{margin:5px 0 0;}
 .button-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.modal-box textarea{width:100%;box-sizing:border-box;border:1px solid #b7c8e5;border-radius:10px;padding:10px;font:inherit;color:#172b4d;background:#f8fbff;margin:6px 0 14px}.muted{color:#64748b;font-size:.92rem}
 /* Fun Savings member-record layout inspired by the supplied reference */
 #savings.page.active{color:#18254d;background:#f4f5ff;border:1px solid #d9dcff;border-radius:18px;overflow:hidden;padding:0 14px 14px}
@@ -86,3 +90,29 @@ td{color:#f4f8ff;}
 #savings .empty-hint{font-size:13px;color:#6c7898;padding:8px}
 @media(max-width:950px){#savings .savings-layout{grid-template-columns:1fr}#savings .savings-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){#savings .savings-brand{padding:16px;align-items:flex-start}#savings .savings-tagline{display:none}#savings .savings-section-head{align-items:flex-start;flex-direction:column}#savings .savings-form-grid{grid-template-columns:1fr}#savings .savings-tabs{gap:6px;padding:9px}#savings .savings-tab{font-size:12px;padding:10px 6px}#savings .savings-layout{padding:9px}#savings .savings-card{padding:12px}}
+/* Church collection allocation panel */
+.collection-panel{margin-bottom:22px}.collection-allocation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin:18px 0}.allocation-item{display:flex;flex-direction:column;gap:7px;padding:15px;border-radius:12px;background:#f0eaff;color:#29204a;border:1px solid #ddd0ff}.allocation-item span{font-size:.85rem;color:#67558e}.allocation-item b{font-size:1.15rem}.top-actions button[aria-label="Instructions"]{font-size:1.2rem;font-weight:800;min-width:42px}
+
+/* Required field marker for correction notes and activity purpose */
+.required-label-text::after{content:" *";color:#ff4d5e;font-weight:800}
+
+/* Easy-to-find date picker controls on desktop and touch screens */
+.date-field-label{position:relative;}
+.date-field-label input[type="date"]{width:100%;min-width:0;min-height:48px;padding:11px 116px 11px 12px!important;cursor:pointer;color-scheme:light;}
+.date-field-label input[type="date"]::-webkit-calendar-picker-indicator{opacity:1;cursor:pointer;width:22px;height:22px;margin-left:4px;}
+.date-picker-button{position:absolute;right:7px;bottom:7px;min-height:34px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:6px 9px;border:1px solid #8aa9d2;border-radius:8px;background:#e7f1ff;color:#17365f;font-size:12px;font-weight:700;cursor:pointer;z-index:1;}
+.date-picker-button:hover,.date-picker-button:focus-visible{background:#d2e6ff;outline:2px solid #3989ed;outline-offset:1px;}
+.date-picker-button span:first-child{font-size:17px;line-height:1;}
+@media(max-width:700px){.date-field-label input[type="date"]{min-height:50px;padding-right:112px!important;font-size:16px;}.date-picker-button{min-height:36px;right:6px;bottom:7px;padding:6px 8px;font-size:12px;}}
+
+/* Contextual sidebar help */
+.sidebar-help{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.16)}
+.sidebar-help .btn{white-space:normal;line-height:1.3;text-align:left}
+.section-info-content{line-height:1.6;color:inherit}
+.section-info-content p{margin:0 0 10px}
+.section-info-content ul{margin:8px 0 14px;padding-left:22px}
+.section-info-content li{margin:6px 0}
+@media(max-width:760px){
+  .sidebar-help{margin-top:10px;padding-top:10px}
+  .sidebar-help .btn{width:100%;text-align:center}
+}
