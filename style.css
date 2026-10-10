@@ -116,3 +116,83 @@ td{color:#f4f8ff;}
   .sidebar-help{margin-top:10px;padding-top:10px}
   .sidebar-help .btn{width:100%;text-align:center}
 }
+
+.btn.danger{background:#fff0f0!important;color:#a62323!important;border:1px solid #e8aaaa!important}.btn.danger:hover{background:#ffe0e0!important}.allocation-item .btn{margin-top:8px}
+
+/* Compact icon-rail navigation: keeps navigation available without taking full width. */
+.sidebar{flex:0 0 245px;transition:flex-basis .22s ease,width .22s ease,padding .22s ease;overflow:hidden;min-width:0}
+.layout.sidebar-collapsed .sidebar{flex-basis:70px;width:70px;padding:18px 8px;border-right:1px solid rgba(255,255,255,.08)}
+.layout.sidebar-collapsed .sidebar .side-title{display:none}
+.layout.sidebar-collapsed .sidebar .nav-btn{width:52px;min-width:52px;height:48px;padding:8px;margin:5px 0;text-align:center;font-size:0;display:flex;align-items:center;justify-content:center;border-radius:13px}
+.layout.sidebar-collapsed .sidebar .nav-btn .nav-icon-only{float:none;font-size:21px;line-height:1}
+.layout.sidebar-collapsed .sidebar .nav-btn span:not(.nav-icon-only){display:none}
+#sidebarToggle{white-space:nowrap}
+@media(max-width:1000px){.sidebar{flex-basis:205px}}
+@media(max-width:700px){.sidebar{width:100%;flex-basis:auto;transition:none}.layout.sidebar-collapsed .sidebar{display:flex;width:62px;flex-basis:62px;padding:10px 5px;flex-direction:column;overflow:visible}.layout.sidebar-collapsed .sidebar .nav-btn{width:50px;min-width:50px}.layout.sidebar-collapsed .sidebar .nav-btn .nav-icon-only{font-size:20px}.top-actions{flex-wrap:wrap;justify-content:flex-end}.top-actions #sidebarToggle{font-size:11px;padding:8px}}
+
+/* Activity allocation cards: tighter layout that uses the available width without horizontal scrolling. */
+#sidebarToggle{width:42px;min-width:42px;height:42px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:1.35rem;line-height:1;border-radius:12px}
+#activities .collection-allocation-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 16px;align-items:stretch}
+#activities .allocation-item{display:flex;min-width:0;flex-direction:column;gap:7px;padding:10px;background:linear-gradient(155deg,#f5f2ff,#e8efff);border:1px solid #cbd5f5;border-radius:12px;box-shadow:0 2px 6px rgba(8,22,52,.07)}
+#activities .allocation-card-head{display:flex;justify-content:space-between;align-items:center;gap:6px}
+#activities .allocation-card-head strong{font-size:.88rem;line-height:1.2;color:#22204b}
+#activities .allocation-percent{flex-shrink:0;background:#d8e6ff;color:#214a93;border-radius:999px;padding:3px 6px;font-size:.7rem;font-weight:800}
+#activities .allocation-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#activities .allocation-metrics>div{background:#fff;border:1px solid #dce3f4;border-radius:7px;padding:7px 7px;min-width:0}
+#activities .allocation-metrics small{display:block;color:#5a6682;font-size:.67rem;line-height:1.2;min-height:2.3em;margin-bottom:3px}
+#activities .allocation-metrics b{display:block;color:#202d4e;font-size:.86rem;overflow-wrap:anywhere;line-height:1.15}
+#activities .allocation-metrics .spent-value{color:#b45309}
+#activities .allocation-actions{display:flex;justify-content:flex-end;margin-top:0}
+#activities .allocation-actions .btn{padding:5px 8px;font-size:.68rem;min-height:28px}
+#activities .panel-title{align-items:flex-start}
+#activities .panel-title>div{min-width:0}
+#activities .panel-title .card-help{max-width:900px;line-height:1.35;margin-bottom:0}
+@media(max-width:1100px){#activities .collection-allocation-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:800px){#activities .collection-allocation-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#activities .allocation-item{padding:9px;gap:7px}#activities .allocation-metrics{gap:5px}#activities .allocation-metrics>div{padding:7px 6px}}
+@media(max-width:420px){#activities .collection-allocation-grid{grid-template-columns:1fr}#sidebarToggle{width:40px;min-width:40px;height:40px}}
+
+/* Convenient dashboard sidebar toggle and clickable home brand. */
+.brand-home{display:inline-block;padding:0;border:0;background:transparent;color:inherit;font:inherit;font-size:22px;font-weight:800;text-align:left;cursor:pointer}
+.brand-home:hover{color:#c9e6ff}
+.hero-tools{display:flex;align-items:center;gap:12px}
+.sidebar-icon-toggle{width:42px;min-width:42px;height:42px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:1.25rem;line-height:1;border-radius:12px;flex-shrink:0}
+@media(max-width:700px){.brand-home{font-size:17px}.hero-tools{gap:6px}.sidebar-icon-toggle{width:38px;min-width:38px;height:38px}}
+
+/* Keep the sidebar toggle beside the home title in the top header only. */
+.brand-group{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-group>div{min-width:0}
+.brand-group #sidebarToggle{flex-shrink:0}
+@media(max-width:700px){.brand-group{gap:8px}.brand-group .subtitle{display:none}}
+
+/* Ultra-compact Activity Allocation Balances: retain two clear metrics and the always-visible records table. */
+#activities .collection-allocation-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:8px 0 10px}
+#activities .allocation-item{gap:5px;padding:8px;border-radius:10px;box-shadow:none}
+#activities .allocation-card-head{gap:4px;min-height:20px}
+#activities .allocation-card-head strong{font-size:.82rem;line-height:1.15}
+#activities .allocation-percent{padding:2px 5px;font-size:.66rem}
+#activities .allocation-metrics{gap:5px}
+#activities .allocation-metrics>div{padding:5px 6px;border-radius:6px}
+#activities .allocation-metrics small{font-size:.62rem;line-height:1.15;min-height:2.1em;margin-bottom:2px}
+#activities .allocation-metrics b{font-size:.8rem;line-height:1.1}
+#activities .allocation-actions{margin-top:0}
+#activities .allocation-actions .btn{padding:4px 7px;font-size:.64rem;min-height:25px;line-height:1.1}
+#activities .table-wrap{margin-top:8px}
+@media(max-width:1100px){#activities .collection-allocation-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:800px){#activities .collection-allocation-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#activities .allocation-item{padding:7px;gap:5px}#activities .allocation-metrics>div{padding:5px}#activities .allocation-actions .btn{font-size:.62rem;padding:4px 6px}}
+@media(max-width:420px){#activities .collection-allocation-grid{grid-template-columns:1fr}#activities .allocation-card-head strong{font-size:.84rem}}
+
+/* Compact, functional allocation help popover and balanced final card row. */
+#activities .allocation-heading-wrap{position:relative;min-width:0}
+#activities .panel-title h2{display:inline-flex;align-items:center;gap:7px;margin-bottom:8px}
+#activities .heading-info-icon{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;flex:0 0 17px;border:1px solid #8bb8ef;border-radius:50%;font-size:11px;font-weight:800;color:#e6f2ff;background:#31557e;line-height:1;padding:0;cursor:pointer}
+#activities .heading-info-icon:hover,#activities .heading-info-icon:focus-visible{background:#4779ad;outline:2px solid #9bc7ff;outline-offset:2px}
+#activities .allocation-info-tip{position:absolute;z-index:8;top:calc(100% + 4px);left:0;width:min(440px,calc(100vw - 56px));padding:11px 13px;border:1px solid #5c7fa6;border-radius:9px;background:#0b2038;color:#f2f7ff;font-size:12px;line-height:1.45;box-shadow:0 10px 28px rgba(0,0,0,.38)}
+#activities .allocation-info-tip[hidden]{display:none}
+@media(min-width:1101px){#activities .collection-allocation-grid{grid-template-columns:repeat(12,minmax(0,1fr))}#activities .collection-allocation-grid>.allocation-item{grid-column:span 3}#activities .collection-allocation-grid>.allocation-item:nth-child(5){grid-column:2/span 3}#activities .collection-allocation-grid>.allocation-item:nth-child(6){grid-column:5/span 3}#activities .collection-allocation-grid>.allocation-item:nth-child(7){grid-column:8/span 3}}
+@media(min-width:801px) and (max-width:1100px){#activities .collection-allocation-grid{grid-template-columns:repeat(6,minmax(0,1fr))}#activities .collection-allocation-grid>.allocation-item{grid-column:span 2}}
+@media(max-width:800px){#activities .collection-allocation-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#activities .collection-allocation-grid>.allocation-item{grid-column:auto}}
+
+/* Contextual help buttons sit beside the relevant page title. */
+.page-info-button{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:24px;height:24px;margin-left:5px;padding:0;border:1px solid rgba(130,190,255,.55);border-radius:50%;background:rgba(55,115,180,.24);color:#bfe1ff;font-size:14px;font-weight:800;line-height:1;cursor:pointer}
+.page-info-button:hover,.page-info-button:focus-visible{background:rgba(55,145,225,.5);outline:2px solid rgba(130,190,255,.6);outline-offset:2px}
+.page-head h1{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
