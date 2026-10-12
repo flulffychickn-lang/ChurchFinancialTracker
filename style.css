@@ -876,9 +876,9 @@ body.live-overview-open{overflow:hidden}
 .live-overview-backdrop[hidden]{display:none!important}
 .live-overview-backdrop{position:fixed;inset:0;z-index:1000;display:block;padding:0;background:rgba(2,8,19,.30);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);pointer-events:none}
 .live-overview{pointer-events:auto;position:fixed;right:22px;top:86px;width:min(650px,calc(100vw - 36px));max-height:calc(100vh - 108px);margin:0;border-radius:18px;animation:liveOverviewIn .16s ease-out}
-.live-overview-fab{position:fixed;right:22px;bottom:24px;z-index:1002;width:54px;height:54px;border-radius:50%;border:1px solid #62b9ff;background:linear-gradient(135deg,#087ee8,#5a3fe2);color:#fff;font-size:25px;box-shadow:0 8px 28px rgba(0,0,0,.45),0 0 0 4px rgba(30,133,255,.13);display:flex;align-items:center;justify-content:center}
-.live-overview-fab:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.live-overview-fab{position:fixed;right:22px;bottom:88px;z-index:1002;touch-action:none;cursor:grab;user-select:none;width:54px;height:54px;border-radius:50%;border:1px solid #62b9ff;background:linear-gradient(135deg,#087ee8,#5a3fe2);color:#fff;font-size:25px;box-shadow:0 8px 28px rgba(0,0,0,.45),0 0 0 4px rgba(30,133,255,.13);display:flex;align-items:center;justify-content:center}
+.live-overview-fab:hover{transform:translateY(-2px);filter:brightness(1.08)}.live-overview-fab:active{cursor:grabbing}.live-overview-fab[style*="left"]{right:auto}.live-overview-fab[style*="top"]{bottom:auto}
 .live-overview-fab[aria-expanded="true"]{background:linear-gradient(135deg,#16436e,#102541);border-color:#8bcfff}
 .live-overview-open{overflow:auto!important}
 @keyframes liveOverviewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:700px){.live-overview{right:10px;top:74px;width:min(520px,calc(100vw - 20px));max-height:calc(100vh - 92px)}.live-overview-fab{right:14px;bottom:14px;width:48px;height:48px}}
+@media(max-width:700px){.live-overview{right:10px;top:74px;width:min(520px,calc(100vw - 20px));max-height:calc(100vh - 92px)}.live-overview-fab{right:14px;bottom:78px;width:48px;height:48px}}

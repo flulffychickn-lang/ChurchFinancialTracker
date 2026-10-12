@@ -507,19 +507,38 @@ function deleteCashRecord(i){
     if(data.cashBalance-amount < -0.005)return toast("Cannot delete this donation because Cash on Hand would become negative.");data.cashBalance=Math.round((data.cashBalance-amount)*100)/100;data.collectionRecords=data.collectionRecords.filter(cr=>cr.cashRecordId!==r.id);data.collectionRecords.unshift({id:Date.now()+Math.random(),date:r.date||today(),type:"Donation Record Deleted",category:"Donation",amount:-amount,note:"Donation deleted; no allocation shares were reversed because it was not auto-allocated."});
   }else if(r.type==="Cash Transferred to Bank"){
     const transferAmount=Math.abs(amount),account=data.accounts.find(a=>a.name===r.linkedBankAccount);
-    if(!account)return toast("Cannot safely delete this transfer because its linked bank account was not found.");
-    if(Number(account.balance||0)<transferAmount)return toast("Cannot delete this transfer because the bank account does not have enough balance to reverse it.");
-    data.cashBalance=(Number(data.cashBalance)||0)+transferAmount;account.balance=(Number(account.balance)||0)-transferAmount;
-    const linked=data.bankRecords.find(br=>br.linkId===r.id);if(linked)data.bankRecords=data.bankRecords.filter(br=>br!==linked);
+    if(!account){
+      const linked=data.bankRecords.filter(br=>String(br.linkId)===String(r.id));
+      if(!confirm(`The linked bank account “${r.linkedBankAccount||"(missing account reference)"}” was not found. Delete this orphaned transfer anyway? Cash on Hand will be restored by ${peso(transferAmount)}, any matching bank transaction history will be removed, and a reconciliation note will be recorded. No missing account balance can be adjusted.`))return;
+      data.cashBalance=Math.round(((Number(data.cashBalance)||0)+transferAmount)*100)/100;
+      data.bankRecords=data.bankRecords.filter(br=>String(br.linkId)!==String(r.id));
+      data.collectionRecords.unshift({id:Date.now()+Math.random(),date:r.date||today(),type:"Orphaned Transfer Deleted",category:"Bank Transfer",amount:transferAmount,note:`Transfer deleted and Cash on Hand restored. Linked account “${r.linkedBankAccount||"unknown"}” was missing; bank-side balance could not be adjusted.`});
+    }else{
+      if(Number(account.balance||0)<transferAmount)return toast("Cannot delete this transfer because the bank account does not have enough balance to reverse it.");
+      data.cashBalance=(Number(data.cashBalance)||0)+transferAmount;account.balance=(Number(account.balance)||0)-transferAmount;
+      const linked=data.bankRecords.find(br=>String(br.linkId)===String(r.id));if(linked)data.bankRecords=data.bankRecords.filter(br=>String(br.linkId)!==String(r.id));
+    }
   }else{
-    if(data.cashBalance-amount< -0.005||data.collectionBalance-amount< -0.005)return toast("Cannot delete this collection because reversing it would make a balance negative.");
     const shares=r.allocationShares||(()=>{const s={};let allocated=0;COLLECTION_SPLITS.forEach(([name,pct],idx)=>{const part=idx===COLLECTION_SPLITS.length-1?Math.round((amount-allocated)*100)/100:Math.round((amount*pct/100)*100)/100;allocated+=part;s[name]=part;});return s;})();
-    for(const [name,shareRaw] of Object.entries(shares)){const share=Number(shareRaw)||0;if((Number(data.collectionAllocations[name])||0)-share < -0.005)return toast(`Cannot delete this collection because ${name} funds have already been used. Reverse related activity records first.`);}
-    data.cashBalance=Math.round(((Number(data.cashBalance)||0)-amount)*100)/100;
-    data.collectionBalance=Math.round(((Number(data.collectionBalance)||0)-amount)*100)/100;
-    for(const [name,shareRaw] of Object.entries(shares))data.collectionAllocations[name]=Math.round(((Number(data.collectionAllocations[name])||0)-(Number(shareRaw)||0))*100)/100;
-    if(r.id!==undefined)data.collectionRecords=data.collectionRecords.filter(cr=>cr.cashRecordId!==r.id);
-    data.collectionRecords.unshift({id:Date.now()+Math.random(),date:r.date||today(),type:"Cash Record Deleted",category:r.type||"Collection",amount:-amount,note:"Collection deleted and allocation balances reversed."});
+    const shortfalls=[];
+    for(const [name,shareRaw] of Object.entries(shares)){const share=Number(shareRaw)||0;const available=Number(data.collectionAllocations[name])||0;if(available-share < -0.005)shortfalls.push(`${name}: ${peso(share-available)}`);}
+    const cashShortfall=(Number(data.cashBalance)||0)-amount < -0.005;
+    const collectionShortfall=(Number(data.collectionBalance)||0)-amount < -0.005;
+    if(shortfalls.length||cashShortfall||collectionShortfall){
+      const details=[...shortfalls,...(cashShortfall?[`Cash on Hand shortfall: ${peso(amount-(Number(data.cashBalance)||0))}`]:[]),...(collectionShortfall?[`Collection balance shortfall: ${peso(amount-(Number(data.collectionBalance)||0))}`]:[])].join("\n");
+      if(!confirm(`This collection has already been partly used, so a normal reversal would make one or more balances negative.\n\nDelete anyway and reconcile automatically?\n${details}\n\nThe collection and linked history will be removed, available balances will be floored at ₱0.00 where needed, and a reconciliation note will preserve the shortfall details.`))return;
+      data.cashBalance=Math.max(0,Math.round(((Number(data.cashBalance)||0)-amount)*100)/100);
+      data.collectionBalance=Math.max(0,Math.round(((Number(data.collectionBalance)||0)-amount)*100)/100);
+      for(const [name,shareRaw] of Object.entries(shares)){const share=Number(shareRaw)||0;const before=Number(data.collectionAllocations[name])||0;data.collectionAllocations[name]=Math.max(0,Math.round((before-share)*100)/100);}
+      if(r.id!==undefined)data.collectionRecords=data.collectionRecords.filter(cr=>String(cr.cashRecordId)!==String(r.id));
+      data.collectionRecords.unshift({id:Date.now()+Math.random(),date:r.date||today(),type:"Collection Deletion Reconciliation",category:r.type||"Collection",amount:-amount,note:`Collection deleted with reconciliation. ${details}`});
+    }else{
+      data.cashBalance=Math.round(((Number(data.cashBalance)||0)-amount)*100)/100;
+      data.collectionBalance=Math.round(((Number(data.collectionBalance)||0)-amount)*100)/100;
+      for(const [name,shareRaw] of Object.entries(shares))data.collectionAllocations[name]=Math.round(((Number(data.collectionAllocations[name])||0)-(Number(shareRaw)||0))*100)/100;
+      if(r.id!==undefined)data.collectionRecords=data.collectionRecords.filter(cr=>String(cr.cashRecordId)!==String(r.id));
+      data.collectionRecords.unshift({id:Date.now()+Math.random(),date:r.date||today(),type:"Cash Record Deleted",category:r.type||"Collection",amount:-amount,note:"Collection deleted and allocation balances reversed."});
+    }
   }
   data.cashRecords.splice(i,1);persist();toast("Cash record deleted and Activity Allocation Balances refreshed.");
 }
@@ -687,6 +706,17 @@ document.addEventListener('click',function(event){
 });
 
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.getElementById('liveOverviewBackdrop')?.hidden)closeLiveOverview();});
+// The live overview launcher is draggable and remembers its position locally.
+(function makeLiveOverviewLauncherMovable(){
+ const fab=document.getElementById('liveOverviewToggle');if(!fab)return;
+ try{const saved=JSON.parse(localStorage.getItem('churchFinanceOverviewFabPosition')||'null');if(saved&&Number.isFinite(saved.left)&&Number.isFinite(saved.top)){fab.style.left=`${Math.max(0,Math.min(innerWidth-54,saved.left))}px`;fab.style.top=`${Math.max(0,Math.min(innerHeight-54,saved.top))}px`;fab.style.right='auto';fab.style.bottom='auto';}}catch(_){}
+ let startX=0,startY=0,origLeft=0,origTop=0,moved=false,dragging=false;
+ fab.addEventListener('pointerdown',e=>{if(e.button!==0)return;const rect=fab.getBoundingClientRect();startX=e.clientX;startY=e.clientY;origLeft=rect.left;origTop=rect.top;moved=false;dragging=true;fab.setPointerCapture?.(e.pointerId);});
+ fab.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-startX,dy=e.clientY-startY;if(Math.abs(dx)>4||Math.abs(dy)>4)moved=true;if(!moved)return;const left=Math.max(0,Math.min(innerWidth-fab.offsetWidth,origLeft+dx)),top=Math.max(0,Math.min(innerHeight-fab.offsetHeight,origTop+dy));fab.style.left=`${left}px`;fab.style.top=`${top}px`;fab.style.right='auto';fab.style.bottom='auto';});
+ fab.addEventListener('pointerup',e=>{if(!dragging)return;dragging=false;if(moved){try{const r=fab.getBoundingClientRect();localStorage.setItem('churchFinanceOverviewFabPosition',JSON.stringify({left:r.left,top:r.top}));}catch(_){}fab.dataset.dragged='1';setTimeout(()=>delete fab.dataset.dragged,80);}});
+ fab.addEventListener('click',e=>{if(fab.dataset.dragged==='1'){e.preventDefault();e.stopImmediatePropagation();}} ,true);
+ window.addEventListener('resize',()=>{const r=fab.getBoundingClientRect();if(r.right>innerWidth)fab.style.left=`${Math.max(0,innerWidth-fab.offsetWidth-8)}px`;if(r.bottom>innerHeight)fab.style.top=`${Math.max(0,innerHeight-fab.offsetHeight-8)}px`;});
+})();
 // Keep the floating read-only overview fresh after app state renders.
 const _originalRenderAll=renderAll;
 renderAll=function(){_originalRenderAll();if(!document.getElementById('liveOverviewBackdrop')?.hidden)renderLiveOverview();};
