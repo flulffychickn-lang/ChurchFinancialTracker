@@ -196,3 +196,689 @@ td{color:#f4f8ff;}
 .page-info-button{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:24px;height:24px;margin-left:5px;padding:0;border:1px solid rgba(130,190,255,.55);border-radius:50%;background:rgba(55,115,180,.24);color:#bfe1ff;font-size:14px;font-weight:800;line-height:1;cursor:pointer}
 .page-info-button:hover,.page-info-button:focus-visible{background:rgba(55,145,225,.5);outline:2px solid rgba(130,190,255,.6);outline-offset:2px}
 .page-head h1{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+/* Church Operations: compact top collections workflow and balanced two-column work area */
+.operations-columns{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);gap:16px;align-items:start}
+.operations-left,.operations-right{min-width:0}
+.operations-columns .panel{padding:16px;margin-bottom:14px}
+.operations-columns .table-wrap{max-height:330px;overflow:auto}
+.operation-summary{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0 16px}
+.operation-summary .balance-card{padding:15px;border-radius:14px;min-width:0}
+.operation-summary .balance-card strong{font-size:clamp(18px,1.7vw,25px);overflow-wrap:anywhere;margin:7px 0}
+#activities .two-col{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:1100px){.operations-columns{grid-template-columns:1fr}.operation-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.operation-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.operations-columns .panel{padding:13px}}
+
+/* Final Church Operations spacing/alignment pass */
+.operations-columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+.operations-columns .panel{padding:12px;margin-bottom:10px;min-width:0}
+.operations-columns .panel-title{margin-bottom:8px}
+#activities .collection-allocation-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px;margin:8px 0 10px;align-items:stretch;grid-auto-rows:1fr}
+#activities .collection-allocation-grid>.allocation-item{grid-column:span 3;min-width:0;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;gap:7px;padding:9px}
+#activities .collection-allocation-grid>.allocation-item:nth-child(5){grid-column:2/span 3}
+#activities .collection-allocation-grid>.allocation-item:nth-child(6){grid-column:5/span 3}
+#activities .collection-allocation-grid>.allocation-item:nth-child(7){grid-column:8/span 3}
+#activities .allocation-card-head{min-height:32px;align-items:flex-start}
+#activities .allocation-card-head strong{overflow-wrap:anywhere}
+#activities .allocation-metrics{margin-top:auto;align-items:stretch}
+#activities .allocation-metrics>div{height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;min-height:58px}
+#activities .allocation-metrics small{min-height:2.2em}
+#activities .allocation-actions{margin-top:2px;min-height:26px;align-items:center}
+#activities .table-wrap{max-width:100%;margin-top:7px}
+@media(min-width:801px) and (max-width:1100px){.operations-columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}#activities .collection-allocation-grid{grid-template-columns:repeat(6,minmax(0,1fr))}#activities .collection-allocation-grid>.allocation-item{grid-column:span 2}#activities .collection-allocation-grid>.allocation-item:nth-child(n){grid-column:span 2}}
+@media(max-width:800px){.operations-columns{grid-template-columns:minmax(0,1fr);gap:8px}#activities .collection-allocation-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}#activities .collection-allocation-grid>.allocation-item{grid-column:auto!important;padding:8px}#activities .allocation-card-head{min-height:28px}}
+@media(max-width:420px){#activities .collection-allocation-grid{grid-template-columns:minmax(0,1fr)}#activities .collection-allocation-grid>.allocation-item{grid-column:auto!important}#activities .allocation-metrics>div{min-height:54px}}
+
+/* Space-efficient but readable Church Operations allocation panel */
+@media(min-width:1101px){
+  .operations-columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:stretch}
+  .operations-left>.panel,.operations-right>.panel{height:auto;min-width:0}
+  #activities .collection-allocation-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:10px 0 12px;grid-auto-rows:auto}
+  #activities .collection-allocation-grid>.allocation-item{grid-column:auto!important;min-height:132px;height:auto;padding:10px;gap:7px;justify-content:space-between}
+  #activities .allocation-card-head{min-height:28px;align-items:flex-start}
+  #activities .allocation-card-head strong{font-size:.88rem;line-height:1.2}
+  #activities .allocation-metrics>div{min-height:64px;padding:7px;display:block}
+  #activities .allocation-metrics small{font-size:.68rem;min-height:2.2em}
+  #activities .allocation-metrics b{font-size:.88rem}
+  #activities .allocation-actions .btn{font-size:.7rem;padding:5px 8px;min-height:27px}
+}
+.allocation-records-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 6px;padding-top:8px;border-top:1px solid rgba(130,170,210,.2)}
+.allocation-records-title h3{margin:0;font-size:.9rem}
+.allocation-records-title .btn{flex-shrink:0}
+#activities .operations-columns .table-wrap{width:100%;max-width:100%;overflow:auto;box-sizing:border-box}
+@media(max-width:1100px){#activities .collection-allocation-grid{grid-template-columns:repeat(3,minmax(0,1fr))}#activities .collection-allocation-grid>.allocation-item{grid-column:auto!important;min-height:128px}}
+@media(max-width:800px){#activities .collection-allocation-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#activities .collection-allocation-grid>.allocation-item{min-height:120px}}
+@media(max-width:420px){#activities .collection-allocation-grid{grid-template-columns:1fr}}
+/* Final alignment pass: make both operations columns share a common bottom edge. */
+@media (min-width: 801px) {
+  .operations-columns { align-items: stretch !important; }
+  .operations-left, .operations-right { min-width: 0; min-height: 0; }
+  .operations-left > .panel { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+  .operations-right { display: flex; flex-direction: column; align-self: stretch; }
+  .operations-right > .panel:last-child { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .operations-right > .panel:last-child .table-wrap { flex: 1 1 auto; min-height: 180px; max-height: none; }
+  .operations-left .table-wrap { max-height: 330px; }
+}
+@media (max-width: 800px) {
+  .operations-left > .panel { height: auto; }
+  .operations-right > .panel:last-child .table-wrap { max-height: 330px; }
+}
+
+/* Final allocation-card packing: four per row on wide desktop, with the last three centered. */
+@media (min-width: 1101px) {
+  #activities .collection-allocation-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    gap: 8px;
+    align-items: stretch;
+  }
+  #activities .collection-allocation-grid > .allocation-item {
+    grid-column: span 3 !important;
+    min-width: 0;
+    min-height: 126px;
+    height: auto;
+  }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(5) { grid-column: 2 / span 3 !important; }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(6) { grid-column: 5 / span 3 !important; }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(7) { grid-column: 8 / span 3 !important; }
+}
+
+/* Activity Records: keep the table in a bounded scrolling viewport so its rows do not stretch the panel and borders stay tidy. */
+@media (min-width: 801px) {
+  #activities .operations-right > .panel:last-child {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #activities .operations-right > .panel:last-child .table-wrap {
+    flex: 0 1 330px;
+    height: 330px;
+    min-height: 180px;
+    max-height: 330px;
+    overflow-y: auto;
+    overflow-x: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    box-sizing: border-box;
+  }
+}
+@media (max-width: 800px) {
+  #activities .operations-right > .panel:last-child .table-wrap {
+    height: 330px;
+    max-height: 330px;
+    min-height: 180px;
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+}
+
+
+/* Guard against oversized amounts breaking financial cards and summary panels. */
+.balance-card strong, .allocation-metrics b, .account-row strong, td, .selected-summary strong { overflow-wrap:anywhere; word-break:normal; min-width:0; }
+.operation-summary .balance-card strong { font-size:clamp(15px,1.25vw,22px); line-height:1.25; overflow-wrap:anywhere; word-break:break-word; }
+#activities .allocation-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+#activities .allocation-metrics>div { min-width:0; overflow:hidden; }
+#activities .allocation-metrics b { display:block; font-size:clamp(.68rem,.9vw,.88rem); overflow-wrap:anywhere; word-break:break-word; }
+input[type=number] { max-width:100%; box-sizing:border-box; }
+
+/* Readable allocation cards: wider three-column layout on desktop and no inner amount scrollbars. */
+@media (min-width: 801px) {
+  #activities .collection-allocation-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    align-items: stretch;
+  }
+  #activities .collection-allocation-grid > .allocation-item,
+  #activities .collection-allocation-grid > .allocation-item:nth-child(n) {
+    grid-column: auto !important;
+    min-width: 0;
+    min-height: 128px;
+    height: auto;
+    padding: 9px;
+  }
+}
+#activities .allocation-metrics { gap: 6px; }
+#activities .allocation-metrics > div {
+  min-width: 0;
+  overflow: visible !important;
+  padding: 6px;
+}
+#activities .allocation-metrics small {
+  line-height: 1.2;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+#activities .allocation-metrics b {
+  max-width: 100%;
+  font-size: clamp(.58rem, .72vw, .8rem) !important;
+  line-height: 1.2;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  white-space: normal;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 800px) {
+  #activities .collection-allocation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #activities .collection-allocation-grid > .allocation-item { grid-column: auto !important; }
+  #activities .allocation-metrics b { font-size: .72rem !important; }
+}
+@media (max-width: 420px) {
+  #activities .collection-allocation-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}
+
+/* Final allocation-card fix: avoid digit-by-digit overflow and keep the seven cards balanced. */
+#activities .collection-allocation-grid { display:grid !important; grid-template-columns:repeat(12,minmax(0,1fr)) !important; gap:8px !important; align-items:stretch; }
+#activities .collection-allocation-grid > .allocation-item { grid-column:span 3 !important; min-width:0; height:auto; min-height:128px; padding:9px; box-sizing:border-box; }
+#activities .collection-allocation-grid > .allocation-item:nth-child(5) { grid-column:2 / span 3 !important; }
+#activities .collection-allocation-grid > .allocation-item:nth-child(6) { grid-column:5 / span 3 !important; }
+#activities .collection-allocation-grid > .allocation-item:nth-child(7) { grid-column:8 / span 3 !important; }
+#activities .allocation-metrics { display:grid; grid-template-columns:minmax(0,1fr) !important; gap:5px !important; min-width:0; }
+#activities .allocation-metrics > div { min-width:0; width:100%; box-sizing:border-box; overflow:hidden; }
+#activities .allocation-metrics b { display:block; max-width:100%; white-space:nowrap !important; overflow:hidden; text-overflow:ellipsis; overflow-wrap:normal !important; word-break:normal !important; font-size:.8rem !important; line-height:1.25; }
+#activities .allocation-card-head strong { min-width:0; overflow-wrap:anywhere; }
+@media(max-width:1100px) and (min-width:801px) {
+ #activities .collection-allocation-grid { grid-template-columns:repeat(6,minmax(0,1fr)) !important; }
+ #activities .collection-allocation-grid > .allocation-item,
+ #activities .collection-allocation-grid > .allocation-item:nth-child(n) { grid-column:span 2 !important; }
+}
+@media(max-width:800px) {
+ #activities .collection-allocation-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+ #activities .collection-allocation-grid > .allocation-item,
+ #activities .collection-allocation-grid > .allocation-item:nth-child(n) { grid-column:auto !important; }
+}
+@media(max-width:420px) { #activities .collection-allocation-grid { grid-template-columns:minmax(0,1fr) !important; } }
+
+/* Stable allocation grid: size cards from the panel width, never from nested 12-column rules. */
+#activities .collection-allocation-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+  width: 100%;
+  min-width: 0;
+}
+#activities .collection-allocation-grid > .allocation-item,
+#activities .collection-allocation-grid > .allocation-item:nth-child(n) {
+  grid-column: auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+  padding: 10px !important;
+  overflow: hidden !important;
+}
+#activities .collection-allocation-grid > .allocation-item:nth-child(7) {
+  grid-column: 2 !important;
+}
+#activities .allocation-card-head,
+#activities .allocation-card-head strong {
+  min-width: 0 !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  letter-spacing: normal !important;
+}
+#activities .allocation-metrics {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+#activities .allocation-metrics > div {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+#activities .allocation-metrics small {
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+}
+#activities .allocation-metrics b {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  font-size: .82rem !important;
+  line-height: 1.25 !important;
+}
+#activities .allocation-item .btn,
+#activities .allocation-item button {
+  max-width: 100% !important;
+  white-space: nowrap !important;
+}
+@media (max-width: 900px) {
+  #activities .collection-allocation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(7) { grid-column: auto !important; }
+}
+@media (max-width: 460px) {
+  #activities .collection-allocation-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(7) { grid-column: auto !important; }
+}
+
+/* Match Allocation Records and Activity Records tables and keep action buttons compact. */
+#activities .operations-columns > .operations-left,
+#activities .operations-columns > .operations-right,
+#activities .operations-columns .panel {
+  min-width: 0;
+  height: 100%;
+}
+#activities .operations-columns .panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+#activities .operations-columns .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  height: 330px;
+  min-height: 220px;
+  max-height: 330px;
+  overflow: auto;
+  flex: 0 0 330px;
+  border: 1px solid #355477;
+  border-radius: 12px;
+  scrollbar-gutter: stable;
+}
+#activities .operations-columns .table-wrap table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+#activities .operations-left .table-wrap table { min-width: 540px; }
+#activities .operations-right .table-wrap table { min-width: 600px; }
+#activities .operations-left .table-wrap th:nth-child(1) { width: 13%; }
+#activities .operations-left .table-wrap th:nth-child(2) { width: 22%; }
+#activities .operations-left .table-wrap th:nth-child(3) { width: 13%; }
+#activities .operations-left .table-wrap th:nth-child(4) { width: 36%; }
+#activities .operations-left .table-wrap th:nth-child(5) { width: 16%; }
+#activities .operations-right .table-wrap th:nth-child(1) { width: 11%; }
+#activities .operations-right .table-wrap th:nth-child(2) { width: 13%; }
+#activities .operations-right .table-wrap th:nth-child(3) { width: 12%; }
+#activities .operations-right .table-wrap th:nth-child(4) { width: 16%; }
+#activities .operations-right .table-wrap th:nth-child(5) { width: 30%; }
+#activities .operations-right .table-wrap th:nth-child(6) { width: 18%; }
+#activities .operations-columns .table-wrap th,
+#activities .operations-columns .table-wrap td {
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+#activities .operations-columns .table-wrap td:last-child {
+  text-align: center;
+  white-space: nowrap;
+}
+#activities .operations-columns .table-wrap td:last-child > .btn,
+#activities .operations-columns .table-wrap .button-row .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 0;
+  min-height: 32px;
+  padding: 7px 10px;
+  margin: 2px;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: nowrap;
+  word-break: normal;
+}
+#activities .operations-columns .table-wrap .button-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+#activities .operations-columns .table-wrap .btn.danger {
+  min-width: 58px;
+  color: #b91c1c;
+  background: #fff1f1;
+  border: 1px solid #f6b7b7;
+}
+@media (max-width: 700px) {
+  #activities .operations-columns .table-wrap { height: 300px; flex-basis: 300px; max-height: 300px; }
+  #activities .operations-left .table-wrap table,
+  #activities .operations-right .table-wrap table { min-width: 580px; }
+}
+
+/* Operations workspace: align both record panels and eliminate excess blank space. */
+#activities .operations-columns {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+}
+#activities .operations-left,
+#activities .operations-right {
+  display: grid !important;
+  grid-template-rows: minmax(0, auto) minmax(260px, 1fr) !important;
+  align-content: stretch !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  height: 100% !important;
+}
+#activities .operations-left > .panel,
+#activities .operations-right > .panel {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+#activities .allocation-balances-panel { align-self: start; }
+#activities .allocation-records-panel,
+#activities .operations-right > .panel:last-child {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 260px !important;
+}
+#activities .allocation-records-panel .table-wrap,
+#activities .operations-right > .panel:last-child .table-wrap {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 300px !important;
+  min-height: 220px !important;
+  max-height: 360px !important;
+  min-width: 0 !important;
+  overflow: auto !important;
+  box-sizing: border-box !important;
+}
+#activities .operations-left .table-wrap table,
+#activities .operations-right .table-wrap table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+@media (max-width: 800px) {
+  #activities .operations-columns { grid-template-columns: minmax(0, 1fr) !important; }
+  #activities .operations-left,
+  #activities .operations-right { display: flex !important; flex-direction: column !important; height: auto !important; }
+  #activities .allocation-records-panel .table-wrap,
+  #activities .operations-right > .panel:last-child .table-wrap { height: 300px !important; flex: 0 0 300px !important; }
+}
+
+/* Final operations layout: keep both record panels aligned at the bottom while preserving compact allocation cards. */
+@media (min-width: 801px) {
+  #activities .operations-columns {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    grid-template-rows: minmax(620px, auto) !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  #activities .operations-left,
+  #activities .operations-right {
+    display: grid !important;
+    grid-template-rows: minmax(0, 1fr) 250px !important;
+    align-content: stretch !important;
+    gap: 10px !important;
+    height: 100% !important;
+    min-height: 620px !important;
+    min-width: 0 !important;
+  }
+  #activities .operations-left > .allocation-balances-panel,
+  #activities .operations-right > .panel:first-child {
+    min-height: 0 !important;
+    height: 100% !important;
+    align-self: stretch !important;
+  }
+  #activities .operations-left > .allocation-records-panel,
+  #activities .operations-right > .panel:last-child {
+    height: 250px !important;
+    min-height: 250px !important;
+    max-height: 250px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-self: stretch !important;
+  }
+  #activities .allocation-records-panel .table-wrap,
+  #activities .operations-right > .panel:last-child .table-wrap {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: auto !important;
+  }
+  /* Cards stay compact at the top of their panel even when the panel is taller to align records. */
+  #activities .allocation-balances-panel #collectionAllocations {
+    align-content: start !important;
+    align-items: start !important;
+  }
+}
+@media (max-width: 800px) {
+  #activities .operations-columns { grid-template-columns: minmax(0, 1fr) !important; }
+  #activities .operations-left,
+  #activities .operations-right { min-height: 0 !important; }
+  #activities .operations-left > .allocation-records-panel,
+  #activities .operations-right > .panel:last-child {
+    height: auto !important;
+    min-height: 250px !important;
+    max-height: none !important;
+  }
+}
+
+/* Final allocation card fit: use the panel width evenly without overflowing or letter-stacking. */
+@media (min-width: 801px) {
+  #activities .collection-allocation-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-auto-rows: minmax(132px, auto) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    align-content: start !important;
+  }
+  #activities .collection-allocation-grid > .allocation-item,
+  #activities .collection-allocation-grid > .allocation-item:nth-child(n) {
+    grid-column: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: 132px !important;
+    height: 100% !important;
+    padding: 8px !important;
+    gap: 6px !important;
+    overflow: hidden !important;
+  }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(5) { grid-column: 1 / span 1 !important; }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(6) { grid-column: 2 / span 1 !important; }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(7) { grid-column: 3 / span 1 !important; }
+  #activities .allocation-card-head { gap: 4px !important; }
+  #activities .allocation-card-head strong { font-size: .82rem !important; line-height: 1.15 !important; }
+  #activities .allocation-metrics { grid-template-columns: minmax(0, 1fr) !important; gap: 4px !important; }
+  #activities .allocation-metrics > div { padding: 6px !important; }
+  #activities .allocation-item .btn,
+  #activities .allocation-item button { padding: 5px 8px !important; font-size: .68rem !important; }
+}
+@media (max-width: 800px) {
+  #activities .collection-allocation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+  #activities .collection-allocation-grid > .allocation-item,
+  #activities .collection-allocation-grid > .allocation-item:nth-child(n) { grid-column: auto !important; min-width: 0 !important; }
+}
+@media (max-width: 460px) {
+  #activities .collection-allocation-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}
+
+/* Center the final three allocation cards while keeping all four columns equal. */
+@media (min-width: 801px) {
+  #activities .collection-allocation-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+  }
+  #activities .collection-allocation-grid > .allocation-item,
+  #activities .collection-allocation-grid > .allocation-item:nth-child(-n+4) {
+    grid-column: span 3 !important;
+  }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(5) { grid-column: 2 / span 3 !important; }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(6) { grid-column: 5 / span 3 !important; }
+  #activities .collection-allocation-grid > .allocation-item:nth-child(7) { grid-column: 8 / span 3 !important; }
+}
+
+/* Church Operations summary order and compact contextual instruction buttons */
+#activities .operation-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#activities .operation-title { position:relative; display:flex; align-items:center; gap:8px; margin-bottom:15px; }
+#activities .operation-title h2 { margin:0; }
+#activities .operation-title .heading-info-icon { flex:0 0 18px; }
+#activities .operation-info-tip { position:absolute; z-index:12; top:calc(100% + 6px); left:0; width:min(420px, calc(100vw - 56px)); padding:11px 13px; border:1px solid #5c7fa6; border-radius:9px; background:#0b2038; color:#f2f7ff; font-size:12px; line-height:1.45; box-shadow:0 10px 28px rgba(0,0,0,.38); }
+#activities .operation-info-tip[hidden] { display:none; }
+@media(max-width:1000px){#activities .operation-summary{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:460px){#activities .operation-summary{grid-template-columns:minmax(0,1fr);}}
+
+
+/* Keep the activity form instructions inline to the right of the section title. */
+#activities .activity-form-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px;min-width:0;}
+#activities .activity-form-heading h2{margin:0;flex:0 0 auto;}
+#activities .activity-form-help{margin:2px 0 0 auto;max-width:58%;font-size:.82rem;line-height:1.4;color:var(--muted,#c5d4e8);text-align:right;}
+@media(max-width:900px){#activities .activity-form-heading{flex-direction:column;gap:6px;}#activities .activity-form-help{max-width:100%;margin:0;text-align:left;}}
+
+/* Match Allocation Records and Activity Records headers and export button alignment. */
+#activities .allocation-records-title { min-height: 42px; margin: 0 0 8px !important; padding: 0 !important; border-top: 0 !important; align-items: center !important; }
+#activities .allocation-records-title h3 { margin: 0 !important; font-size: 1rem !important; line-height: 1.2 !important; }
+#activities .allocation-records-title .btn { flex: 0 0 auto; white-space: nowrap; }
+#activities .activity-form-heading.operation-title { position: relative; display: flex; align-items: center; justify-content: flex-start; margin-bottom: 15px; min-width: 0; }
+#activities .activity-form-heading.operation-title h2 { display: inline-flex; align-items: center; gap: 7px; margin: 0; flex: 0 1 auto; }
+#activities .activity-form-heading.operation-title .operation-info-tip { left: 0; right: auto; text-align: left; }
+
+/* Fill the otherwise-empty lower part of the activity form with a useful, quiet checklist. */
+#activities .activity-form-checklist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(130,170,210,.2)}
+#activities .activity-form-checklist>div{display:flex;align-items:flex-start;gap:8px;min-width:0;padding:10px;border:1px solid rgba(130,170,210,.18);border-radius:10px;background:rgba(255,255,255,.025)}
+#activities .activity-form-checklist>div>span{display:grid;place-items:center;flex:0 0 22px;width:22px;height:22px;border-radius:50%;background:rgba(45,133,255,.2);color:#bcdcff;font-size:11px;font-weight:800}
+#activities .activity-form-checklist p{margin:0;min-width:0;line-height:1.3}
+#activities .activity-form-checklist strong{display:block;font-size:11px;color:#edf5ff}
+#activities .activity-form-checklist small{display:block;margin-top:4px;font-size:10px;line-height:1.35;color:#a9bdd4}
+@media(max-width:1000px){#activities .activity-form-checklist{grid-template-columns:1fr}}
+
+/* Bank Management: contain long account lists and keep Quick Actions compact. */
+#bank .bank-accounts-scroll{max-height:300px;overflow-y:auto;overflow-x:hidden;padding-right:3px;overscroll-behavior:contain;scrollbar-gutter:stable}
+#bank .bank-accounts-scroll::-webkit-scrollbar{width:8px}
+#bank .bank-accounts-scroll::-webkit-scrollbar-thumb{background:rgba(151,190,229,.48);border-radius:8px}
+#bank .bank-accounts-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,.12);border-radius:8px}
+#bank .quick-actions-panel{align-self:start;height:max-content;min-width:0}
+#bank .quick-actions-title{position:relative;margin-bottom:12px}
+#bank .quick-actions-title h2{margin:0;display:flex;align-items:center;gap:5px}
+#bank .quick-actions-title .operation-info-tip{position:absolute;z-index:8;top:calc(100% + 8px);left:0;max-width:min(420px,90vw);padding:12px 14px;border:1px solid rgba(130,190,255,.4);border-radius:12px;background:#0b2034;color:#edf7ff;box-shadow:0 12px 30px rgba(0,0,0,.4);font-size:13px;line-height:1.45}
+#bank .quick-actions-title .operation-info-tip[hidden]{display:none}
+#bank .quick-grid{margin-bottom:0}
+/* Financial reports: compact readable charts, audit log, and export panels. */
+#reports .report-summary-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#reports .report-chart-panel,#reports .report-log-panel,#reports .report-export-panel,#reports .report-backup-panel{margin-top:14px}
+#reports .report-charts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+#reports .report-bar-row{display:grid;grid-template-columns:minmax(130px,220px) minmax(60px,1fr) minmax(100px,150px);gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+#reports .report-bar-label{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#reports .report-bar-track{height:14px;border-radius:99px;background:#0b1d33;overflow:hidden;border:1px solid #355477}
+#reports .report-bar-fill{height:100%;border-radius:99px;min-width:0}
+#reports .report-bar-fill.blue{background:linear-gradient(90deg,#2386ff,#59b7ff)}#reports .report-bar-fill.green{background:linear-gradient(90deg,#079875,#5ee0b3)}#reports .report-bar-fill.orange{background:linear-gradient(90deg,#c66c12,#ffc15d)}#reports .report-bar-fill.purple{background:linear-gradient(90deg,#7747dd,#b39aff)}
+#reports .report-bar-row strong{text-align:right;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+#reports .report-log-wrap{max-height:320px;overflow:auto}#reports .report-log-wrap table{min-width:560px}
+#reports .report-backup-panel .panel-title{display:flex;align-items:center;justify-content:space-between;gap:12px}#reports .report-backup-panel p,#reports .report-export-panel p{max-width:900px;line-height:1.55}
+@media(max-width:760px){#reports .report-summary-cards{grid-template-columns:1fr}#reports .report-bar-row{grid-template-columns:minmax(90px,130px) minmax(40px,1fr);gap:8px}#reports .report-bar-row strong{grid-column:2;text-align:left}#reports .report-bar-track{grid-column:2;grid-row:1}}
+
+/* Reports dashboard: compact two-column layout with internal scrolling. */
+#reports{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:14px}
+#reports>.page-head,#reports>.report-summary-cards{grid-column:1/-1;margin-bottom:0}
+#reports .report-chart-panel,#reports .report-log-panel,#reports .report-export-panel,#reports .report-backup-panel{margin:0;min-width:0}
+#reports .report-chart-panel,#reports .report-log-panel{height:360px;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#reports .report-chart-panel .panel-title,#reports .report-log-panel .panel-title{flex:0 0 auto}
+#reports .report-charts{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:5px;scrollbar-gutter:stable}
+#reports .report-log-wrap{flex:1 1 auto;min-height:0;max-height:none;overflow:auto;scrollbar-gutter:stable}
+#reports .report-export-panel,#reports .report-backup-panel{align-self:stretch}
+#reports .report-export-panel p,#reports .report-backup-panel p{margin-top:8px;margin-bottom:12px}
+#reports .report-export-panel .btn,#reports .report-backup-panel .btn{margin-top:4px}
+@media(max-width:760px){
+  #reports{grid-template-columns:minmax(0,1fr);gap:12px}
+  #reports>.page-head,#reports>.report-summary-cards{grid-column:1}
+  #reports .report-chart-panel,#reports .report-log-panel{height:320px}
+}
+
+
+/* Reports polish: keep Data & Backup snug to its controls and move export guidance into its info icon. */
+#reports .report-export-panel .report-export-title{display:flex;align-items:center;justify-content:flex-start;margin:0 0 12px;min-height:0}
+#reports .report-export-title h2{display:flex;align-items:center;gap:7px;margin:0}
+#reports .report-info-wrap{position:relative;display:inline-flex;align-items:center}
+#reports .heading-info-icon{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;flex:0 0 19px;border:1px solid #8bb8ef;border-radius:50%;font-size:12px;font-weight:800;color:#e6f2ff;background:#31557e;line-height:1;padding:0;cursor:pointer}
+#reports .heading-info-icon:hover,#reports .heading-info-icon:focus-visible{background:#4779ad;outline:2px solid #9bc7ff;outline-offset:2px}
+#reports .report-info-wrap .operation-info-tip{position:absolute;z-index:20;top:calc(100% + 8px);left:0;width:min(430px,calc(100vw - 48px));padding:11px 13px;border:1px solid #5c7fa6;border-radius:9px;background:#0b2038;color:#f2f7ff;font-size:12px;line-height:1.45;box-shadow:0 10px 28px rgba(0,0,0,.38)}
+#reports .report-info-wrap .operation-info-tip[hidden]{display:none}
+#reports .report-backup-panel{align-self:start;height:max-content;min-height:0}
+#reports .report-backup-panel>p{margin-bottom:10px}
+#reports .report-backup-panel .btn{margin-bottom:0}
+
+/* Ensure the Reports grid follows the same page visibility state as navigation. */
+#reports.page:not(.active){display:none !important;}
+#reports.page.active{display:grid;}
+
+/* Fixed navigation and Church Operations live, view-only overview popover. */
+@media (min-width:701px){
+  .layout{align-items:stretch}
+  #mainSidebar{position:sticky;top:82px;align-self:flex-start;height:calc(100vh - 82px);overflow-y:auto;overflow-x:hidden;flex-shrink:0;z-index:8;scrollbar-width:thin;scrollbar-color:#365b8b transparent}
+}
+.operations-page-head{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.live-overview-trigger{white-space:nowrap;flex-shrink:0}
+.live-overview-backdrop[hidden]{display:none!important}
+.live-overview-backdrop{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(2,8,19,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.live-overview{width:min(790px,96vw);max-height:min(90vh,980px);display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(155deg,#0b1e36,#102b4c);border:1px solid #3989ff;border-radius:20px;box-shadow:0 24px 90px rgba(0,0,0,.62),0 0 0 1px rgba(48,126,255,.18);outline:none;color:#f4f8ff}
+.live-overview-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px 8px}
+.live-overview-head>div{display:flex;align-items:center;gap:12px;min-width:0}
+.live-overview-head h2{font-size:19px;margin:0;line-height:1.3}
+.live-overview-head h2 span{font-weight:500;color:#9eb8d9;font-size:.82em}
+.live-eye{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;border-radius:50%;background:#155fc2;color:#fff;font-size:19px}
+.live-overview-close{width:36px;height:36px;flex-shrink:0;border:1px solid #5e83b1;border-radius:10px;background:#183657;color:#fff;font-size:25px;line-height:1}
+.live-overview-subtitle{margin:0;padding:0 20px 14px;color:#bfd0e7;font-size:13px}
+.live-overview-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0 14px 12px}
+.live-overview-tabs button{min-width:0;border:1px solid #355b86;border-radius:10px;background:#112a49;color:#dceaff;padding:11px 8px;font-weight:700;font-size:12px}
+.live-overview-tabs button.active{background:linear-gradient(120deg,#237cff,#6539e7);border-color:#599cff;color:#fff}
+.live-overview-body{padding:0 14px 12px;overflow:auto;min-height:180px}
+.live-overview-section{display:none}
+.live-overview-section.active{display:block}
+.live-section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;background:#173455;border:1px solid #294f7a;border-radius:12px 12px 0 0}
+.live-section-heading h3{font-size:14px;margin:0}
+.live-section-heading>strong,.live-section-heading>span{font-size:11px;color:#d0e0f5;text-align:right}
+.live-allocation-list,.live-bank-list,.live-activity-list{border:1px solid #294f7a;border-top:0;border-radius:0 0 12px 12px;overflow:hidden;background:rgba(4,19,37,.32)}
+.live-allocation-row{display:grid;grid-template-columns:32px minmax(125px,1.1fr) minmax(90px,1fr) 48px minmax(90px,auto);align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid rgba(112,155,202,.13)}
+.live-allocation-row:last-child,.live-bank-row:last-child,.live-activity-row:last-child{border-bottom:0}
+.live-category-icon{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#1976e8,#5745d6);color:#fff;font-weight:800}
+.live-allocation-name{min-width:0}.live-allocation-name b{display:block;font-size:12px;overflow-wrap:anywhere}.live-allocation-name small{display:block;color:#8faaca;font-size:10px;margin-top:3px}
+.live-progress{height:10px;border:1px solid #3a628e;border-radius:99px;overflow:hidden;background:#08172a}.live-progress span{display:block;height:100%;background:linear-gradient(90deg,#2a8bff,#3dd2b0);border-radius:99px}
+.live-percent{font-size:11px;font-weight:800;text-align:center;border:1px solid #36577e;background:#132e4e;border-radius:99px;padding:4px}
+.live-money{font-size:12px;text-align:right;white-space:nowrap}
+.live-bank-row{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid rgba(112,155,202,.13)}
+.live-bank-row b{font-size:12px;overflow-wrap:anywhere}.live-bank-row strong{font-size:12px;white-space:nowrap}
+.live-cash-balance{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding:13px 15px;border:1px solid #287e82;background:rgba(12,157,130,.12);border-radius:11px}.live-cash-balance span{color:#b4d9df;font-size:12px}.live-cash-balance strong{font-size:14px}
+.live-activity-row{display:grid;grid-template-columns:9px 145px minmax(120px,1fr) minmax(100px,.7fr);align-items:center;gap:9px;padding:11px 12px;border-bottom:1px solid rgba(112,155,202,.13)}
+.live-activity-row time,.live-activity-row span,.live-activity-row small{font-size:11px;overflow-wrap:anywhere}.live-activity-row time,.live-activity-row small{color:#a9c0dc}.live-activity-row span{color:#f4f8ff}
+.live-status-dot{width:9px;height:9px;display:inline-block;border-radius:50%;background:#3dd2a0;box-shadow:0 0 10px rgba(61,210,160,.35)}
+.live-pill{display:inline-block;margin-left:5px;padding:3px 6px;border-radius:20px;background:rgba(39,205,150,.15);color:#62e9bd;font-size:9px;vertical-align:middle}
+.live-overview-footer{display:flex;justify-content:space-between;gap:12px;padding:11px 18px;border-top:1px solid #29496d;color:#9db5d2;font-size:10px;background:rgba(2,12,25,.28)}
+.live-overview-footer>span:first-child{display:flex;align-items:center;gap:7px}.live-overview-footer .live-status-dot{width:7px;height:7px}
+body.live-overview-open{overflow:hidden}
+@media(max-width:700px){
+  #mainSidebar{position:sticky;top:74px;z-index:8;max-height:calc(100vh - 74px);overflow-x:auto;overflow-y:hidden}
+  .operations-page-head{align-items:flex-start;flex-direction:column}
+  .live-overview-backdrop{padding:8px;align-items:center}
+  .live-overview{width:100%;max-height:94vh;border-radius:15px}
+  .live-overview-head{padding:13px 13px 7px}.live-overview-head h2{font-size:16px}.live-overview-subtitle{padding:0 13px 10px;font-size:12px}
+  .live-overview-tabs{padding:0 9px 9px;gap:4px}.live-overview-tabs button{font-size:10px;padding:10px 4px}
+  .live-overview-body{padding:0 9px 9px}
+  .live-allocation-row{grid-template-columns:27px minmax(95px,1fr) 42px minmax(75px,auto);gap:6px;padding:8px}.live-progress{display:none}.live-category-icon{width:26px;height:26px}.live-money{font-size:11px}
+  .live-activity-row{grid-template-columns:8px minmax(95px,.7fr) minmax(100px,1.2fr);gap:7px;padding:9px}.live-activity-row small{grid-column:3}.live-activity-row time,.live-activity-row span,.live-activity-row small{font-size:10px}
+  .live-overview-footer{font-size:9px;padding:9px 12px}
+}
+
+/* Non-blocking floating live overview: page remains interactive behind the visual backdrop. */
+.live-overview-backdrop[hidden]{display:none!important}
+.live-overview-backdrop{position:fixed;inset:0;z-index:1000;display:block;padding:0;background:rgba(2,8,19,.30);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);pointer-events:none}
+.live-overview{pointer-events:auto;position:fixed;right:22px;top:86px;width:min(650px,calc(100vw - 36px));max-height:calc(100vh - 108px);margin:0;border-radius:18px;animation:liveOverviewIn .16s ease-out}
+.live-overview-fab{position:fixed;right:22px;bottom:24px;z-index:1002;width:54px;height:54px;border-radius:50%;border:1px solid #62b9ff;background:linear-gradient(135deg,#087ee8,#5a3fe2);color:#fff;font-size:25px;box-shadow:0 8px 28px rgba(0,0,0,.45),0 0 0 4px rgba(30,133,255,.13);display:flex;align-items:center;justify-content:center}
+.live-overview-fab:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.live-overview-fab[aria-expanded="true"]{background:linear-gradient(135deg,#16436e,#102541);border-color:#8bcfff}
+.live-overview-open{overflow:auto!important}
+@keyframes liveOverviewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){.live-overview{right:10px;top:74px;width:min(520px,calc(100vw - 20px));max-height:calc(100vh - 92px)}.live-overview-fab{right:14px;bottom:14px;width:48px;height:48px}}

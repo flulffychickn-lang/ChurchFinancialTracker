@@ -12,7 +12,7 @@
       <div class="brand-group">
         <button class="btn secondary" id="sidebarToggle" type="button" onclick="toggleSidebar()" aria-controls="mainSidebar" aria-expanded="true" title="Collapse sidebar" aria-label="Collapse sidebar">◧</button>
         <div>
-          <button type="button" class="brand brand-home" onclick="go('dashboard')" title="Go to Dashboard" aria-label="Go to Dashboard">⛪ Church Finance System</button>
+          <button type="button" class="brand brand-home" onclick="go('activities')" title="Go to Church Operations" aria-label="Go to Church Operations">⛪ Church Finance System</button>
           <div class="subtitle">Simple • Clear • Church-friendly finance management</div>
         </div>
       </div>
@@ -28,11 +28,9 @@
     <div class="layout">
       <aside class="sidebar" id="mainSidebar">
         <div class="side-title">Main Menu</div>
-        <button class="nav-btn active" data-page="dashboard">🏠 Dashboard</button>
-        <button class="nav-btn" data-page="cash">💵 Grace Giving – Cash on Hand</button>
+        <button class="nav-btn active" data-page="activities">🏛️ Church Operations</button>
         <button class="nav-btn" data-page="bank">🏦 Bank Management</button>
         
-        <button class="nav-btn" data-page="activities">📋 Church Activities</button>
         <button class="nav-btn" data-page="savings">💜 Fun Savings Cooperative</button>
         <button class="nav-btn future" data-page="loans">🤝 Loans <span>Future</span></button>
         <button class="nav-btn future" data-page="services">🛒 Load / GCash / Mart <span>Future</span></button>
@@ -40,37 +38,6 @@
       </aside>
 
       <main class="content">
-        <section id="dashboard" class="page active">
-          <div class="hero">
-            <div>
-              <span class="eyebrow">CHURCH FINANCE</span>
-              <h1>Church Finance Dashboard</h1>
-              <p>Choose an area below to record or review church finances.</p>
-            </div>
-            <div class="hero-tools"><div class="hero-icon">✦</div></div>
-          </div>
-
-          <div class="cards">
-            <div class="balance-card bank"><span>🏦 Bank Balance</span><strong id="dashBank">₱0.00</strong><small>All church bank accounts</small></div>
-            <div class="balance-card cash"><span>💵 Grace Giving – Cash on Hand</span><strong id="dashCash">₱0.00</strong><small>Physical cash available</small></div>
-            <div class="balance-card collection"><span>🤲 Total Money Collected</span><strong id="dashCollected">₱0.00</strong><small>Recorded offerings and donations</small></div>
-            <div class="balance-card savings"><span>💜 Fun Savings Cooperative</span><strong id="dashSavings">₱0.00</strong><small>Member savings</small></div>
-          </div>
-
-          <h2>What do you want to do?</h2>
-          <div class="action-grid">
-            <button class="action-card" onclick="go('bank')"><b>🏦 Bank Management</b><span>Deposit, withdrawal, transfer, balance</span></button>
-            <button class="action-card" onclick="go('cash')"><b>💵 Grace Giving – Cash on Hand</b><span>Record offerings and donations first</span></button>
-            <button class="action-card" onclick="go('activities')"><b>📋 Church Activities</b><span>Maintenance, projects, food, anniversary</span></button>
-            <button class="action-card" onclick="go('savings')"><b>💜 Fun Savings Cooperative</b><span>Members and weekly savings</span></button>
-          </div>
-
-          <div class="info-box">
-            <b>Prototype mode</b>
-            <p>This version uses sample data and your browser's local storage. Nothing is connected to a real bank or shared with other users.</p>
-          </div>
-        </section>
-
         <section id="bank" class="page">
           <div class="page-head"><div><span class="eyebrow">STEP 1</span><h1>🏦 Bank Management <button type="button" class="page-info-button" onclick="showSectionInfo('bank')" title="Bank Management instructions" aria-label="Bank Management instructions">ⓘ</button></h1><p>Manage the church's actual bank balances and transactions.</p></div></div>
           <div class="workflow"><span class="done">1 Deposit</span><span>2 Withdrawal</span><span>3 Fast Transfer</span><span>4 Update Balance</span><span>5 Review Records</span></div>
@@ -78,17 +45,17 @@
             <div class="balance-card bank"><span>Total Bank Balance</span><strong id="bankTotal">₱0.00</strong></div>
           </div>
           <div class="two-col">
-            <div class="panel">
+            <div class="panel bank-accounts-panel">
               <h2>Bank Accounts</h2>
-              <div id="bankAccounts"></div>
+              <div class="bank-accounts-scroll"><div id="bankAccounts"></div></div>
               <button class="btn primary wide" onclick="openModal('accountModal')">＋ Add Bank Account</button>
             </div>
-            <div class="panel">
-              <h2>Quick Actions</h2>
+            <div class="panel quick-actions-panel">
+              <div class="quick-actions-title"><h2>Quick Actions <button type="button" class="heading-info-icon" aria-label="Quick Actions information" aria-expanded="false" aria-controls="quickActionsInfoTip" onclick="toggleOperationInfo(event, 'quickActionsInfoTip')">i</button></h2><div id="quickActionsInfoTip" class="operation-info-tip" role="tooltip" hidden>Use these shortcuts to record bank deposits and withdrawals, transfer funds between bank accounts and Cash on Hand, or update a balance to match a verified statement. Fast Transfer changes both source and destination balances.</div></div>
               <div class="quick-grid">
                 <button onclick="openBankTx('Deposit')">➕<b>Deposit</b><small>Add money to bank</small></button>
                 <button onclick="openBankTx('Withdrawal')">➖<b>Withdrawal</b><small>Money out of bank</small></button>
-                <button onclick="openBankTx('Transfer')">↔️<b>Fast Transfer</b><small>Move between banks</small></button>
+                <button onclick="openBankTx('Transfer')">↔️<b>Fast Transfer</b><small>Cash on Hand or another bank</small></button>
                 <button onclick="openBankTx('Adjustment')">⚙️<b>Update Balance</b><small>Match verified bank balance</small></button>
               </div>
             </div>
@@ -100,30 +67,27 @@
           </div>
         </section>
 
-        <section id="cash" class="page">
-          <div class="page-head"><div><span class="eyebrow">STEP 1 · FIRST RECORD</span><h1>💵 Grace Giving – Cash on Hand <button type="button" class="page-info-button" onclick="showSectionInfo('cash')" title="Grace Giving – Cash on Hand instructions" aria-label="Grace Giving – Cash on Hand instructions">ⓘ</button></h1><p>Record the counted offering or donation before transferring or allocating funds.</p></div></div>
-          <div class="cards compact"><div class="balance-card cash"><span>Cash on Hand Balance</span><strong id="cashTotal">₱0.00</strong></div><div class="balance-card collection"><span>Total Amount Collected</span><strong id="cashCollectedTotal">₱0.00</strong></div></div>
+        <section id="activities" class="page active">
+          <div class="page-head operations-page-head"><div><span class="eyebrow">CHURCH FINANCES</span><h1>🏛️ Church Operations</h1><p>Collections, allocations, expenses, and records in one place.</p></div></div>
+                    <div class="cards compact operation-summary"><div class="balance-card cash"><span>Cash Available This Week</span><strong id="cashWeekAvailable">₱0.00</strong></div><div class="balance-card collection"><span>Collections This Week</span><strong id="cashWeekCollected">₱0.00</strong></div><div class="balance-card collection"><span>Total Amount Collected</span><strong id="cashCollectedTotal">₱0.00</strong></div><div class="balance-card cash"><span>Cash on Hand Balance</span><strong id="cashTotal">₱0.00</strong></div></div>
           <div class="two-col">
-            <div class="panel"><h2>Record Offering / Donation</h2><div class="form-grid">
+            <div class="panel"><div class="operation-title"><h2>Record Offering / Donation</h2><button type="button" class="heading-info-icon" aria-label="Offering and donation instructions" aria-expanded="false" aria-controls="offeringInfoTip" onclick="toggleOperationInfo(event, 'offeringInfoTip')">i</button><div id="offeringInfoTip" class="operation-info-tip" role="tooltip" hidden>Offerings are distributed automatically by the fixed percentages. Donations are added to Cash on Hand only; use Override Amount to assign a donation to a chosen allocation.</div></div><div class="form-grid">
               <label>Record type<select id="cashRecordType"><option value="Offering">Church Offering</option><option value="Donation">Donation</option></select></label>
-              <label>Amount (₱)<input id="cashAmount" type="number" min="0.01" step="0.01" placeholder="0.00"></label>
+              <label>Amount (₱)<input id="cashAmount" type="number" min="0.01" max="1000000000" step="0.01" placeholder="0.00"></label>
               <label>Collection date<input id="cashDate" type="date" required></label><label>Notes / source (optional)<input id="cashNote" placeholder="Offering, donor/source, or details"></label>
-            </div><button class="btn primary" onclick="saveCash()">＋ Record Collection & Allocate</button><p class="card-help">The recorded amount is added to Cash on Hand and automatically distributed to the activity allocation balances using the current percentages.</p></div>
-            <div class="panel"><h2>Transfer Cash to Bank</h2><p class="card-help">Use this after the physical cash is deposited to a bank account.</p><div class="form-grid"><label>Bank account<select id="cashTransferBank"></select></label><label>Amount (₱)<input id="cashTransferAmount" type="number" min="0.01" step="0.01"></label><label>Transfer date<input id="cashTransferDate" type="date" required></label><label>Note<input id="cashTransferNote" placeholder="Deposit slip / reference"></label></div><button class="btn secondary" onclick="transferCashToBank()">↗ Transfer Cash to Bank</button></div>
+            </div><button class="btn primary" onclick="saveCash()">＋ Record Offering / Donation</button></div>
+            <div class="panel"><div class="operation-title"><h2>Transfer Cash to Bank</h2><button type="button" class="heading-info-icon" aria-label="Transfer cash to bank instructions" aria-expanded="false" aria-controls="transferInfoTip" onclick="toggleOperationInfo(event, 'transferInfoTip')">i</button><div id="transferInfoTip" class="operation-info-tip" role="tooltip" hidden>Use this after the physical cash is deposited to a bank account.</div></div><div class="form-grid"><label>Bank account<select id="cashTransferBank"></select></label><label>Amount (₱)<input id="cashTransferAmount" type="number" min="0.01" max="1000000000" step="0.01"></label><label>Transfer date<input id="cashTransferDate" type="date" required></label><label>Note<input id="cashTransferNote" placeholder="Deposit slip / reference"></label></div><button class="btn secondary" onclick="transferCashToBank()">↗ Transfer Cash to Bank</button></div>
           </div>
           <div class="panel"><div class="panel-title"><h2>Cash Records</h2><button class="btn secondary" onclick="exportCSV('cash')">Export Excel/CSV</button></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Notes</th><th>Action</th></tr></thead><tbody id="cashRecords"></tbody></table></div></div>
-        </section>
 
-        <section id="activities" class="page">
-          <div class="page-head"><div><span class="eyebrow">STEP 3 · REVIEW & EXPENSES</span><h1>📋 Church Activities</h1></div></div>
-          <div class="panel"><div class="panel-title"><div class="allocation-heading-wrap"><h2>Activity Allocation Balances <button type="button" class="heading-info-icon" aria-label="Show Activity Allocation Balances information" aria-expanded="false" aria-controls="allocationInfoTip" onclick="toggleAllocationInfo(event)">i</button></h2><div id="allocationInfoTip" class="allocation-info-tip" role="tooltip" hidden>Assigned share is the fixed percentage and amount allocated from collections. Spent is the total expenses or withdrawals recorded against that allocation. Use Override Amount only for an authorized correction.</div></div></div><div id="collectionAllocations" class="collection-allocation-grid"></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Allocation / Activity</th><th>Amount</th><th>Record</th><th>Action</th></tr></thead><tbody id="collectionRecords"></tbody></table></div></div>
-          <div class="panel"><h2>Record Activity Expense / Takeaway</h2><p class="card-help">Choose an allocation card above to preselect it, then enter the date, amount, payment source, and purpose. Pastor and Music Director takeaways may use an optional description.</p><div class="form-grid">
+          <div class="operations-columns"><div class="operations-left"><div class="panel allocation-balances-panel"><div class="panel-title"><div class="allocation-heading-wrap"><h2>Activity Allocation Balances <button type="button" class="heading-info-icon" aria-label="Show Activity Allocation Balances information" aria-expanded="false" aria-controls="allocationInfoTip" onclick="toggleAllocationInfo(event)">i</button></h2><div id="allocationInfoTip" class="allocation-info-tip" role="tooltip" hidden>Assigned share is the fixed percentage and amount allocated from collections. Spent is the total expenses or withdrawals recorded against that allocation. Use Override Amount only for an authorized correction.</div></div></div><div id="collectionAllocations" class="collection-allocation-grid"></div></div><div class="panel allocation-records-panel"><div class="panel-title allocation-records-title"><h3>Allocation Records</h3><button class="btn secondary" onclick="exportCSV('allocations')">Export Excel/CSV</button></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Allocation / Activity</th><th>Amount</th><th>Record</th><th>Action</th></tr></thead><tbody id="collectionRecords"></tbody></table></div></div></div><div class="operations-right">
+          <div class="panel"><div class="activity-form-heading operation-title"><h2>Record Activity Expense / Takeaway <button type="button" class="heading-info-icon" aria-label="Show Record Activity Expense instructions" aria-expanded="false" aria-controls="activityFormInfoTip" onclick="toggleOperationInfo(event, 'activityFormInfoTip')">i</button></h2><div id="activityFormInfoTip" class="operation-info-tip" role="tooltip" hidden>Choose an allocation card above to preselect it, then enter the date, amount, payment source, and purpose. Pastor and Music Director takeaways may use an optional description.</div></div><div class="form-grid">
             <label>Activity / Allocation<select id="activityType" onchange="updateActivityFormHint()"><option>Pastor’s Allocation</option><option>Church Administrator</option><option>Music Director</option><option>Church Anniversary</option><option>Food Ministry</option><option>Maintenance</option><option>Other’s</option></select></label>
-            <label>Date<input id="activityDate" type="date" required></label><label>Amount (₱)<input id="activityAmount" type="number" min="0.01" step="0.01" placeholder="0.00"></label>
-            <label>Paid From<select id="activitySource"><option value="cash">Grace Giving – Cash on Hand</option><option value="collection">Church Collection allocation</option></select></label>
+            <label>Date<input id="activityDate" type="date" required></label><label>Amount (₱)<input id="activityAmount" type="number" min="0.01" max="1000000000" step="0.01" placeholder="0.00"></label>
+            <label>Fund Source<select id="activitySource"><option value="cash">Grace Giving – Cash on Hand</option><option value="collection">Church Collection allocation</option></select></label>
             <label id="activityPurposeLabel"><span class="required-label-text">Purpose</span><input id="activityNote" required placeholder="What was this expense for?"></label>
-          </div><p id="activityFormHint" class="card-help">Enter the purpose, date, and amount. The activity allocation balance will decrease.</p><button class="btn primary" onclick="saveActivity()">Save Activity Record</button></div>
-          <div class="panel"><div class="panel-title"><h2>Activity Records</h2><button class="btn secondary" onclick="exportCSV('activities')">Export Excel/CSV</button></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Activity</th><th>Amount</th><th>Paid From</th><th>Description</th><th>Action</th></tr></thead><tbody id="activityRecords"></tbody></table></div></div>
+          </div><p id="activityFormHint" class="card-help">Enter the purpose, date, and amount. The activity allocation balance will decrease.</p><button class="btn primary" onclick="saveActivity()">Save Activity Record</button><div class="activity-form-checklist" aria-label="Before saving checklist"><div><span>1</span><p><strong>Verify allocation</strong><small>Confirm the selected category.</small></p></div><div><span>2</span><p><strong>Check fund source</strong><small>Choose Cash on Hand or the appropriate source.</small></p></div><div><span>3</span><p><strong>Confirm amount and date</strong><small>Review the receipt or supporting record.</small></p></div></div></div>
+          <div class="panel"><div class="panel-title allocation-records-title"><h3>Activity Records</h3><button class="btn secondary" onclick="exportCSV('activities')">Export Excel/CSV</button></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Activity</th><th>Amount</th><th>Fund Source</th><th>Description</th><th>Action</th></tr></thead><tbody id="activityRecords"></tbody></table></div></div></div></div>
         </section>
 
         <section id="savings" class="page">
@@ -151,7 +115,7 @@
               </div>
               <div class="savings-card add-savings" id="savingsEntryPanel">
                 <h2><span class="step pink">3</span> Add Weekly Savings</h2><p class="card-help">Record a weekly savings deposit.</p>
-                <div class="savings-form-grid"><label>Member <b>*</b><select id="savingsMember"></select></label><label>Transaction <b>*</b><select id="savingsTransactionType"><option value="Weekly Savings">Weekly Savings (Deposit)</option><option value="Withdrawal">Withdrawal</option></select></label><label>Amount (₱) <b>*</b><input id="savingsAmount" type="number" min="0.01" step="0.01" placeholder="0.00"></label><label>Date <b>*</b><input id="savingsDate" type="date" required></label></div>
+                <div class="savings-form-grid"><label>Member <b>*</b><select id="savingsMember"></select></label><label>Transaction <b>*</b><select id="savingsTransactionType"><option value="Weekly Savings">Weekly Savings (Deposit)</option><option value="Withdrawal">Withdrawal</option></select></label><label>Amount (₱) <b>*</b><input id="savingsAmount" type="number" min="0.01" max="1000000000" step="0.01" placeholder="0.00"></label><label>Date <b>*</b><input id="savingsDate" type="date" required></label></div>
                 <label>Notes (optional)<input id="savingsNote" placeholder="e.g. Weekly savings"></label>
                 <button class="btn pink-btn wide" id="saveSavingsButton" onclick="saveSavings()">＋ Save Transaction</button>
                 <div class="note">Dividend and payout rules are not configured in this prototype.</div>
@@ -180,38 +144,50 @@
         </section>
 
         <section id="reports" class="page">
-          <div class="page-head"><span class="eyebrow">REVIEW</span><h1>📊 Financial Reports</h1><p>Simple overview of the current prototype records.</p></div>
-          <div class="cards">
-            <div class="balance-card bank"><span>Bank</span><strong id="reportBank">₱0.00</strong></div>
-            <div class="balance-card cash"><span>Cash</span><strong id="reportCash">₱0.00</strong></div>
+          <div class="page-head"><span class="eyebrow">REVIEW & AUDIT</span><h1>📊 Financial Reports</h1><p>Review church operations, bank activity, balances, and a timestamped action log to support reconciliation and financial oversight.</p></div>
+          <div class="cards compact report-summary-cards">
+            <div class="balance-card bank"><span>Total Bank Balance</span><strong id="reportBank">₱0.00</strong></div>
+            <div class="balance-card cash"><span>Cash on Hand</span><strong id="reportCash">₱0.00</strong></div>
             <div class="balance-card savings"><span>Fun Savings Cooperative</span><strong id="reportSavings">₱0.00</strong></div>
           </div>
-          <div class="panel">
-            <h2>Data & Backup</h2>
-            <p>Use <b>Backup</b> to save a complete JSON copy of this prototype's data. Use the export buttons on each section for Excel-compatible CSV files.</p>
-            <button class="btn primary" onclick="exportBackup()">⬇ Download Full Backup</button>
-            <label class="btn secondary file-btn">⬆ Import Backup<input type="file" accept=".json,application/json" onchange="importBackup(event)"></label>
-            <button class="btn danger" onclick="clearData()">🗑 Clear All Data</button>
-          </div>
+          <div class="panel report-chart-panel"><div class="panel-title"><div><h2>Church Operations & Bank Activity</h2><p class="card-help">Compare recorded collections, expenses, bank deposits, and withdrawals by category. Scroll within this panel to view all charts.</p></div><button class="btn secondary" onclick="renderReports()">↻ Refresh reports</button></div><div id="financialReportCharts" class="report-charts"></div></div>
+          <div class="panel report-log-panel"><div class="panel-title"><div><h2>Action Log</h2><p class="card-help">Records actions, dates, and times when app controls are used on this browser. Scroll within this panel to review the log.</p></div><button class="btn secondary" onclick="exportCSV('audit')">Export Log</button></div><div class="table-wrap report-log-wrap"><table><thead><tr><th>Date</th><th>Time</th><th>Action</th><th>Section</th></tr></thead><tbody id="auditLogRows"></tbody></table></div></div>
+          <div class="panel report-export-panel"><div class="panel-title report-export-title"><h2>Export All Records <span class="report-info-wrap"><button type="button" class="heading-info-icon" aria-label="Export All Records information" aria-expanded="false" onclick="toggleOperationInfo(event, 'exportAllInfoTip')">i</button><span id="exportAllInfoTip" class="operation-info-tip" role="tooltip" hidden>Download one Excel workbook containing separate sheets for summary, bank accounts and transactions, cash collections, allocation balances and records, activity expenses, savings members and transactions, and the action log.</span></span></h2></div><button class="btn primary" onclick="exportAllWorkbook()">⬇ Export All Data — Excel Workbook</button></div>
+          <div class="panel report-backup-panel"><div class="panel-title"><h2>Data & Backup <button type="button" class="heading-info-icon" aria-label="Data and Backup information" onclick="toggleOperationInfo(event, 'dataBackupInfoTip')">i</button></h2><div id="dataBackupInfoTip" class="operation-info-tip" role="tooltip" hidden>Use Backup to save a complete JSON copy of this prototype's data. Use the export buttons on each section for Excel-compatible CSV files.</div></div><p>Save a complete copy before making major changes or moving to another browser.</p><button class="btn primary" onclick="exportBackup()">⬇ Download Full Backup (JSON)</button><label class="btn secondary file-btn">⬆ Import Backup<input type="file" accept=".json,application/json" onchange="importBackup(event)"></label><button class="btn danger" onclick="clearData()">🗑 Clear All Data</button></div>
         </section>
       </main>
     </div>
   </div>
 
+  <div class="live-overview-backdrop" id="liveOverviewBackdrop" hidden aria-hidden="true">
+    <section class="live-overview" role="complementary" aria-labelledby="liveOverviewTitle" tabindex="-1">
+      <header class="live-overview-head"><div><span class="live-eye" aria-hidden="true">◉</span><h2 id="liveOverviewTitle">Live Overview <span>(View Only)</span></h2></div><button type="button" class="live-overview-close" onclick="closeLiveOverview()" aria-label="Close live overview">×</button></header>
+      <p class="live-overview-subtitle">Current balances and recent activity. Updates automatically as you record transactions.</p>
+      <nav class="live-overview-tabs" aria-label="Live overview sections"><button class="active" type="button" data-overview-tab="allocations" onclick="setLiveOverviewTab('allocations')">♟ Allocation Balances</button><button type="button" data-overview-tab="banks" onclick="setLiveOverviewTab('banks')">▤ Bank Accounts</button><button type="button" data-overview-tab="activity" onclick="setLiveOverviewTab('activity')">▣ Recent Activity</button></nav>
+      <div class="live-overview-body">
+        <section class="live-overview-section active" data-overview-section="allocations"><div id="liveOverviewAllocations"></div></section>
+        <section class="live-overview-section" data-overview-section="banks"><div id="liveOverviewBanks"></div></section>
+        <section class="live-overview-section" data-overview-section="activity"><div id="liveOverviewActivity"></div></section>
+      </div>
+      <footer class="live-overview-footer"><span><i class="live-status-dot"></i> Live local data</span><span>View only · Changes are made in the main pages</span></footer>
+    </section>
+  </div>
+  <button class="live-overview-fab" id="liveOverviewToggle" type="button" onclick="toggleLiveOverview()" aria-controls="liveOverviewBackdrop" aria-expanded="false" title="Show or hide live balances and activity" aria-label="Show live balances and activity">◉</button>
   <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="sectionInfoTitle"><div class="modal-box"><button class="close" type="button" onclick="closeModal('instructionsModal')" aria-label="Close information">×</button><h2 id="sectionInfoTitle">Dashboard Information</h2><div id="sectionInfoContent" class="section-info-content"></div><p class="muted">Tip: Press Esc to close this information window. This tracker stores data in this browser and is not connected to real bank accounts.</p></div></div>
-  <div class="modal" id="savingsEditModal"><div class="modal-box"><button class="close" onclick="closeModal('savingsEditModal')">×</button><h2>Update Savings Transaction</h2><p class="muted">Correct a record and explain the change. The member balance will be adjusted automatically.</p><input type="hidden" id="editSavingsIndex"><label>Member<select id="editSavingsMember"></select></label><div class="form-grid"><label>Date<input id="editSavingsDate" type="date"></label><label>Transaction<select id="editSavingsType"><option>Weekly Savings</option><option>Withdrawal</option></select></label><label>Amount (₱)<input id="editSavingsAmount" type="number" min="0.01" step="0.01"></label></div><label>Correction note (required)<textarea id="editSavingsNote" rows="2" placeholder="Explain what was corrected"></textarea></label><button class="btn primary wide" onclick="saveSavingsEdit()">Save Correction</button></div></div>
-  <div class="modal" id="cashEditModal"><div class="modal-box"><button class="close" onclick="closeModal('cashEditModal')">×</button><h2>Update Cash Record</h2><input type="hidden" id="editCashIndex"><div class="form-grid"><label>Date<input id="editCashDate" type="date" required></label><label>Type<select id="editCashType"><option>Offering</option><option>Donation</option><option>Cash Transferred to Bank</option></select></label><label>Amount (₱)<input id="editCashAmount" type="number" step="0.01"></label></div><label><span class="required-label-text">Correction note</span><textarea id="editCashCorrection" required rows="2" placeholder="Explain what was corrected"></textarea></label><button class="btn primary wide" onclick="saveCashEdit()">Save Correction</button></div></div>
-  <div class="modal" id="bankEditModal"><div class="modal-box"><button class="close" onclick="closeModal('bankEditModal')">×</button><h2>Update Bank Record</h2><input type="hidden" id="editBankIndex"><div class="form-grid"><label>Date<input id="editBankDate" type="date" required></label><label>Money direction<select id="editBankDirection"><option value="in">Money in (adds to account)</option><option value="out">Money out (deducts from account)</option></select></label><label>Amount (₱)<input id="editBankAmount" type="number" min="0.01" step="0.01" required></label></div><label><span class="required-label-text">Correction note</span><textarea id="editBankCorrection" required rows="2" placeholder="Explain the change"></textarea></label><button class="btn primary wide" onclick="saveBankEdit()">Save Correction</button></div></div>
-  <div class="modal" id="activityEditModal"><div class="modal-box"><button class="close" onclick="closeModal('activityEditModal')">×</button><h2>Update Activity Record</h2><input type="hidden" id="editActivityIndex"><div class="form-grid"><label>Activity<select id="editActivityType"><option>Pastor’s Allocation</option><option>Church Administrator</option><option>Music Director</option><option>Church Anniversary</option><option>Food Ministry</option><option>Maintenance</option><option>Other’s</option></select></label><label>Date<input id="editActivityDate" type="date" required></label><label>Expense amount (₱)<input id="editActivityAmount" type="number" min="0.01" step="0.01"></label><label>Paid from<select id="editActivitySource"><option value="cash">Grace Giving – Cash on Hand</option><option value="collection">Church Collection allocation</option></select></label></div><label><span class="required-label-text">Correction note</span><textarea id="editActivityCorrection" required rows="2" placeholder="Explain what changed"></textarea></label><button class="btn primary wide" onclick="saveActivityEdit()">Save Correction</button></div></div>
+  <div class="modal" id="savingsEditModal"><div class="modal-box"><button class="close" onclick="closeModal('savingsEditModal')">×</button><h2>Update Savings Transaction</h2><p class="muted">Correct a record and explain the change. The member balance will be adjusted automatically.</p><input type="hidden" id="editSavingsIndex"><label>Member<select id="editSavingsMember"></select></label><div class="form-grid"><label>Date<input id="editSavingsDate" type="date"></label><label>Transaction<select id="editSavingsType"><option>Weekly Savings</option><option>Withdrawal</option></select></label><label>Amount (₱)<input id="editSavingsAmount" type="number" min="0.01" max="1000000000" step="0.01"></label></div><label>Correction note (required)<textarea id="editSavingsNote" rows="2" placeholder="Explain what was corrected"></textarea></label><button class="btn primary wide" onclick="saveSavingsEdit()">Save Correction</button></div></div>
+  <div class="modal" id="cashEditModal"><div class="modal-box"><button class="close" onclick="closeModal('cashEditModal')">×</button><h2>Update Cash Record</h2><input type="hidden" id="editCashIndex"><div class="form-grid"><label>Date<input id="editCashDate" type="date" required></label><label>Type<select id="editCashType"><option>Offering</option><option>Donation</option><option>Cash Transferred to Bank</option></select></label><label>Amount (₱)<input id="editCashAmount" type="number" min="0" max="1000000000" step="0.01"></label></div><label><span class="required-label-text">Correction note</span><textarea id="editCashCorrection" required rows="2" placeholder="Explain what was corrected"></textarea></label><button class="btn primary wide" onclick="saveCashEdit()">Save Correction</button></div></div>
+  <div class="modal" id="bankEditModal"><div class="modal-box"><button class="close" onclick="closeModal('bankEditModal')">×</button><h2>Update Bank Record</h2><input type="hidden" id="editBankIndex"><div class="form-grid"><label>Date<input id="editBankDate" type="date" required></label><label>Money direction<select id="editBankDirection"><option value="in">Money in (adds to account)</option><option value="out">Money out (deducts from account)</option></select></label><label>Amount (₱)<input id="editBankAmount" type="number" min="0.01" max="1000000000" step="0.01" required></label></div><label><span class="required-label-text">Correction note</span><textarea id="editBankCorrection" required rows="2" placeholder="Explain the change"></textarea></label><button class="btn primary wide" onclick="saveBankEdit()">Save Correction</button></div></div>
+  <div class="modal" id="activityEditModal"><div class="modal-box"><button class="close" onclick="closeModal('activityEditModal')">×</button><h2>Update Activity Record</h2><input type="hidden" id="editActivityIndex"><div class="form-grid"><label>Activity<select id="editActivityType"><option>Pastor’s Allocation</option><option>Church Administrator</option><option>Music Director</option><option>Church Anniversary</option><option>Food Ministry</option><option>Maintenance</option><option>Other’s</option></select></label><label>Date<input id="editActivityDate" type="date" required></label><label>Expense amount (₱)<input id="editActivityAmount" type="number" min="0.01" max="1000000000" step="0.01"></label><label>Paid from<select id="editActivitySource"><option value="cash">Grace Giving – Cash on Hand</option><option value="collection">Church Collection allocation</option></select></label></div><label><span class="required-label-text">Correction note</span><textarea id="editActivityCorrection" required rows="2" placeholder="Explain what changed"></textarea></label><button class="btn primary wide" onclick="saveActivityEdit()">Save Correction</button></div></div>
   <div class="modal" id="allocationOverrideModal"><div class="modal-box"><button class="close" onclick="closeModal('allocationOverrideModal')">×</button><h2>Override Allocation Amount</h2><input type="hidden" id="overrideAllocationName"><p id="overrideAllocationHelp" class="card-help"></p><label>Corrected available-to-spend amount (₱)<input id="overrideAllocationAmount" type="number" min="0" step="0.01" required></label><label><span class="required-label-text">Reason for override</span><textarea id="overrideAllocationReason" rows="2" required placeholder="Explain why this balance needs correction"></textarea></label><button class="btn primary wide" onclick="saveAllocationOverride()">Save Override</button></div></div>
   <div id="toast" class="toast"></div>
 
   <div class="modal" id="accountModal"><div class="modal-box"><button class="close" onclick="closeModal('accountModal')">×</button><h2>Add Bank Account</h2><label>Account name<input id="newAccountName" placeholder="e.g. Church Savings Account"></label><label>Starting balance (₱)<input id="newAccountBalance" type="number" min="0" step="0.01" placeholder="0.00"></label><button class="btn primary wide" onclick="addAccount()">Add Account</button></div></div>
 
-  <div class="modal" id="bankModal"><div class="modal-box"><button class="close" onclick="closeModal('bankModal')">×</button><h2 id="bankModalTitle">Bank Transaction</h2><div class="form-grid"><label>Type<select id="bankTxType"><option>Deposit</option><option>Withdrawal</option><option>Transfer</option><option>Adjustment</option></select></label><label>Account<select id="bankAccount"></select></label><label>Amount (₱)<input id="bankAmount" type="number" min="0" step="0.01"></label><label>Transaction date<input id="bankTxDate" type="date" required></label><label id="destWrap">Destination Account<select id="bankDestination"></select></label><label>Note<input id="bankNote" placeholder="Required for adjustments"></label></div><button class="btn primary wide" onclick="saveBankTx()">Save Transaction</button></div></div>
+  <div class="modal" id="bankModal"><div class="modal-box"><button class="close" onclick="closeModal('bankModal')">×</button><h2 id="bankModalTitle">Bank Transaction</h2><div class="form-grid"><label>Type<select id="bankTxType"><option>Deposit</option><option>Withdrawal</option><option>Transfer</option><option>Adjustment</option></select></label><label>Source / Account<select id="bankAccount"></select></label><label>Amount (₱)<input id="bankAmount" type="number" min="0" step="0.01"></label><label>Transaction date<input id="bankTxDate" type="date" required></label><label id="destWrap">Destination Account<select id="bankDestination"><option value="cash">Grace Giving – Cash on Hand</option></select></label><label>Note<input id="bankNote" placeholder="Required for adjustments"></label></div><button class="btn primary wide" onclick="saveBankTx()">Save Transaction</button></div></div>
 
   <div class="modal" id="memberModal"><div class="modal-box"><button class="close" onclick="closeModal('memberModal')">×</button><h2>Add Fun Savings Cooperative Member</h2><label>Member name<input id="newMemberName" placeholder="Full name"></label><button class="btn primary wide" onclick="addMember()">Add Member</button></div></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
