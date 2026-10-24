@@ -99,6 +99,7 @@ function toggleDest(){
   dest.innerHTML=(source.value!=="cash"?'<option value="cash">Grace Giving – Cash on Hand</option>':"")+opts;
   if([...dest.options].some(o=>o.value===old))dest.value=old;else if(dest.options.length)dest.selectedIndex=0;
 }
+function money2(value){const n=Math.round((Number(value)||0)*100)/100;return Math.abs(n)<0.005?0:n;}
 function saveBankTx(){
   const type=document.getElementById("bankTxType")?.value||"Deposit";
   const rawId=document.getElementById("bankAccount")?.value||"";
@@ -114,32 +115,32 @@ function saveBankTx(){
   if(!Number.isFinite(amt)||amt<0||(amt===0&&type!=="Adjustment"))return toast("Please enter a valid amount greater than zero.");
   if(amt>MAX_MONEY_AMOUNT)return toast("Amount cannot exceed ₱1,000,000,000.00.");
   if(type==="Transfer"&&rawId==="cash"){
-    const d=data.accounts.find(x=>Number(x.id)===dest);if(!d)return toast("Choose a destination bank account.");if(amt>Number(data.cashBalance||0))return toast("Transfer exceeds Cash on Hand.");data.cashBalance-=amt;d.balance=(Number(d.balance)||0)+amt;const linkId=Date.now()+Math.random();data.cashRecords.unshift({id:linkId,date,type:"Cash Transferred to Bank",amount:-amt,note:note||"Transferred to "+d.name,linkedBankAccount:d.name});data.bankRecords.unshift({id:Date.now()+Math.random(),linkId,date,type:"Cash Deposit",account:d.name,amount:amt,note:note||"Transferred from Cash on Hand"});document.getElementById("bankAmount").value="";document.getElementById("bankNote").value="";closeModal("bankModal");persist();toast("Cash transferred to bank and both records updated.");return;
+    const d=data.accounts.find(x=>Number(x.id)===dest);if(!d)return toast("Choose a destination bank account.");if(amt>Number(data.cashBalance||0))return toast("Transfer exceeds Cash on Hand.");data.cashBalance=money2(data.cashBalance-amt);d.balance=money2((Number(d.balance)||0)+amt);const linkId=Date.now()+Math.random();data.cashRecords.unshift({id:linkId,date,type:"Cash Transferred to Bank",amount:-amt,note:note||"Transferred to "+d.name,linkedBankAccount:d.name});data.bankRecords.unshift({id:Date.now()+Math.random(),linkId,date,type:"Cash Deposit",account:d.name,amount:amt,note:note||"Transferred from Cash on Hand"});document.getElementById("bankAmount").value="";document.getElementById("bankNote").value="";closeModal("bankModal");persist();toast("Cash transferred to bank and both records updated.");return;
   }
   const a=data.accounts.find(x=>Number(x.id)===id);
   if(!a)return toast("Selected bank account was not found. Please reopen the form.");
   a.balance=Number(a.balance)||0;
   if(type==="Deposit"){
-    a.balance+=amt;data.bankRecords.unshift({id:Date.now()+Math.random(),date,type,account:a.name,amount:amt,note:note||"Bank deposit"});
+    a.balance=money2(a.balance+amt);data.bankRecords.unshift({id:Date.now()+Math.random(),date,type,account:a.name,amount:amt,note:note||"Bank deposit"});
   }else if(type==="Withdrawal"){
-    if(a.balance<amt)return toast("Withdrawal is greater than the bank balance.");
-    a.balance-=amt;data.bankRecords.unshift({id:Date.now()+Math.random(),date,type,account:a.name,amount:-amt,note:note||"Bank withdrawal"});
+    if(a.balance+0.000001<amt)return toast("Withdrawal is greater than the bank balance.");
+    a.balance=money2(a.balance-amt);data.bankRecords.unshift({id:Date.now()+Math.random(),date,type,account:a.name,amount:-amt,note:note||"Bank withdrawal"});
   }else if(type==="Transfer"){
     if(rawDest==="cash"){
-      if(a.balance<amt)return toast("Transfer is greater than the source bank balance.");
-      a.balance-=amt;data.cashBalance=(Number(data.cashBalance)||0)+amt;
+      if(a.balance+0.000001<amt)return toast("Transfer is greater than the source bank balance.");
+      a.balance=money2(a.balance-amt);data.cashBalance=money2((Number(data.cashBalance)||0)+amt);
       const linkId=Date.now()+Math.random();
       data.bankRecords.unshift({id:linkId,date,type:"Transfer to Cash on Hand",account:a.name,amount:-amt,note:note||"Transferred to Grace Giving – Cash on Hand"});
       data.cashRecords.unshift({id:Date.now()+Math.random(),linkId,date,type:"Bank Transfer Received",amount:amt,note:note||"Transferred from "+a.name,linkedBankAccount:a.name});
     }else{
       const d=data.accounts.find(x=>Number(x.id)===dest);if(!d||Number(d.id)===Number(a.id))return toast("Choose a different destination account.");
-      if(a.balance<amt)return toast("Transfer is greater than the source balance.");
-      d.balance=Number(d.balance)||0;a.balance-=amt;d.balance+=amt;
+      if(a.balance+0.000001<amt)return toast("Transfer is greater than the source balance.");
+      d.balance=Number(d.balance)||0;a.balance=money2(a.balance-amt);d.balance=money2(d.balance+amt);
       data.bankRecords.unshift({id:Date.now()+Math.random(),date,type:"Transfer Out",account:a.name,amount:-amt,note:"To "+d.name+(note?" — "+note:"")});
       data.bankRecords.unshift({id:Date.now()+Math.random(),date,type:"Transfer In",account:d.name,amount:amt,note:"From "+a.name+(note?" — "+note:"")});
     }
   }else if(type==="Adjustment"){
-    const diff=amt-a.balance;a.balance=amt;
+    const diff=money2(amt-a.balance);a.balance=money2(amt);
     data.bankRecords.unshift({id:Date.now()+Math.random(),date,type:"Balance Adjustment",account:a.name,amount:diff,note});
   }else return toast("Unknown transaction type.");
   document.getElementById("bankAmount").value="";document.getElementById("bankNote").value="";document.getElementById("bankTxDate").value=today();
@@ -153,7 +154,7 @@ function saveCash(){
   if(!date)return toast("Select the collection date.");
   if(!raw||!Number.isFinite(amt)||amt<=0)return toast("Enter a collection amount greater than zero.");
   if(amt>MAX_MONEY_AMOUNT)return toast("Amount cannot exceed ₱1,000,000,000.00.");
-  data.cashBalance=(Number(data.cashBalance)||0)+amt;
+  data.cashBalance=money2((Number(data.cashBalance)||0)+amt);
   const rec={id:Date.now()+Math.random(),date,type,amount:amt,note,allocationShares:{}};
   data.cashRecords.unshift(rec);
   if(type==="Offering"){
@@ -174,20 +175,20 @@ function saveCash(){
 function selectActivity(name){const el=document.getElementById("activityType");if(el)el.value=name;updateActivityFormHint();document.getElementById("activityAmount")?.focus()}
 function updateActivityFormHint(){const type=document.getElementById("activityType")?.value||"";const optionalPurpose=["Pastor’s Allocation","Music Director","Church Administrator"].includes(type);const takeaway=["Pastor’s Allocation","Music Director"].includes(type);const label=document.getElementById("activityPurposeLabel");if(label){const oldInput=label.querySelector("input");const previousValue=oldInput?oldInput.value:"";label.innerHTML=optionalPurpose?'Description (optional)<input id="activityNote" maxlength="250" placeholder="Optional description">':'<span class="required-label-text">Purpose</span><input id="activityNote" required maxlength="250" placeholder="What was this expense for?">';const nextInput=label.querySelector("input");if(nextInput)nextInput.value=previousValue;}const source=document.getElementById("activitySource");if(takeaway&&source)source.value="cash";const hint=document.getElementById("activityFormHint");if(hint)hint.textContent=takeaway?"Record the withdrawal date and amount taken from this allocation. Fund source is Cash on Hand; description is optional.":type==="Church Administrator"?"Enter the date and amount. A description is optional.":optionalPurpose?"Enter the date and amount. Description is optional.":"Enter the purpose, date, amount, and fund source. The selected activity allocation balance will decrease.";}
 function saveActivity(){
-  const type=document.getElementById("activityType").value,raw=String(document.getElementById("activityAmount").value??"").trim(),amt=Number(raw),note=document.getElementById("activityNote").value.trim(),date=document.getElementById("activityDate")?.value,source=document.getElementById("activitySource")?.value||"cash";
+  const type=document.getElementById("activityType").value,raw=String(document.getElementById("activityAmount").value??"").trim(),amt=money2(Number(raw)),note=document.getElementById("activityNote").value.trim(),date=document.getElementById("activityDate")?.value,source=document.getElementById("activitySource")?.value||"cash";
   const special=["Pastor’s Allocation","Music Director","Church Administrator"].includes(type);
   if(!date)return toast("Select the activity date.");
   if(!raw||!Number.isFinite(amt)||amt<=0)return toast("Enter an expense or takeaway amount greater than zero.");
   if(amt>MAX_MONEY_AMOUNT)return toast("Amount cannot exceed ₱1,000,000,000.00.");
   if(!special&&!note)return toast("Purpose is required for activity expenses.");
   const usesAllocation=(source==="cash"||source==="collection");const available=Number(data.collectionAllocations[type]||0);if(usesAllocation&&amt>available)return toast("Amount exceeds the available allocation for this activity.");
-  if(source==="cash"&&amt>Number(data.cashBalance||0))return toast("Amount exceeds Grace Giving – Cash on Hand.");
-  if(source.startsWith("bank:") ){const account=data.accounts.find(a=>String(a.id)===source.slice(5));if(!account)return toast("Select a valid bank account.");if(amt>Number(account.balance||0))return toast("Amount exceeds the selected bank account balance.");}
+  if(source==="cash"&&money2(amt)>money2(data.cashBalance||0))return toast("Amount exceeds Grace Giving – Cash on Hand.");
+  if(source.startsWith("bank:") ){const account=data.accounts.find(a=>String(a.id)===source.slice(5));if(!account)return toast("Select a valid bank account.");if(money2(amt)>money2(account.balance||0))return toast("Amount exceeds the selected bank account balance.");}
   if(usesAllocation)data.collectionAllocations[type]=available-amt;
-  if(usesAllocation)data.collectionBalance-=amt;if(source==="cash")data.cashBalance-=amt;
+  if(usesAllocation)data.collectionBalance-=amt;if(source==="cash")data.cashBalance=money2((Number(data.cashBalance)||0)-amt);
   let sourceLabel="Grace Giving – Cash on Hand";
   const activityId=Date.now()+Math.random();
-  if(source.startsWith("bank:")){const account=data.accounts.find(a=>String(a.id)===source.slice(5));account.balance-=amt;sourceLabel=account.name;data.bankRecords.unshift({id:Date.now()+Math.random(),activityId,date,type:"Activity Expense",account:account.name,amount:-amt,note:note||type});}
+  if(source.startsWith("bank:")){const account=data.accounts.find(a=>String(a.id)===source.slice(5));account.balance=money2((Number(account.balance)||0)-amt);sourceLabel=account.name;data.bankRecords.unshift({id:Date.now()+Math.random(),activityId,date,type:"Activity Expense",account:account.name,amount:-amt,note:note||type});}
   const r={id:activityId,date,activity:type,amount:-amt,source:sourceLabel,sourceKey:source,note,recordType:special?"Takeaway / Withdrawal":"Activity Expense"};
   data.activities.unshift(r);data.collectionRecords.unshift({id:Date.now()+Math.random(),activityId:r.id,date,type:r.recordType,category:type,amount:-amt,note:note||"Takeaway recorded"});
   document.getElementById("activityAmount").value="";document.getElementById("activityNote").value="";persist();toast(special?"Takeaway recorded and allocation updated.":"Activity expense recorded and allocation updated.");
